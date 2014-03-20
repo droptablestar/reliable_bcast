@@ -1,7 +1,7 @@
 package edu.purdue.cs505;
 
 import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class RChannel implements ReliableChannel {
     /** A list which contains messages the sender needs to send. These are
      * sorted on timeout values with the smallest timeout value being the
      * top of the queue.*/
-    public PriorityQueue<RMessage> messageQueue;
+    public PriorityBlockingQueue<RMessage> messageQueue;
 
     /** The 'machine' id of a node. Used to generate unique port numbers
      * for local testing. */
@@ -38,7 +38,7 @@ public class RChannel implements ReliableChannel {
      */
     public RChannel(int id) {
         Comparator<RMessage> comparator = new RMessageComparator();
-        messageQueue = new PriorityQueue<RMessage>(10, comparator);
+        messageQueue = new PriorityBlockingQueue<RMessage>(10, comparator);
         ackList = Collections.synchronizedList(new ArrayList<RMessage>());
         toAck = Collections.synchronizedList(new ArrayList<RMessage>());
         this.id = id;
@@ -63,7 +63,9 @@ public class RChannel implements ReliableChannel {
      * @param m the message to be sent.
      */
     public void rsend(Message m) {
-        messageQueue.offer((RMessage)m);
+        synchronized(messageQueue) {
+            messageQueue.offer((RMessage)m);
+        }
     } // rsend()
 
     /** Spawns a new receiver thread.

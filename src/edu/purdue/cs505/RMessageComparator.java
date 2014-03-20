@@ -7,8 +7,9 @@ import java.util.Comparator;
 public class RMessageComparator implements Comparator<RMessage> {
     @Override
     public int compare(RMessage m1, RMessage m2) {
-        // if (m1 == null || m2 == null)
-        //     return m1 == null ? 1 : -1;
+        if (m1 == null && m2 == null) return 0;
+        if (m1 == null || m2 == null) return m1 == null ? 1 : -1;
+
         return (int)(m1.getTimeout() - m2.getTimeout());
     }
 }

@@ -12,11 +12,11 @@ public class Node {
         channel.init(args[0], 6666);
         channel.rlisten(rcr);
         if (id == 0) {
-            for (int i=0; i<100; i++)
+            for (int i=0; i<10000; i++)
                 channel.rsend(new RMessage(new Integer(i).toString()));
             channel.rsend((new RMessage(
                                new Integer(100001).toString())
-                           ).makeEOT());
+                           ).makeEOT(1));
         }
         boolean done = false;
         while (!done) {

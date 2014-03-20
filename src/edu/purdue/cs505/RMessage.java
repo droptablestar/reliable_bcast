@@ -9,8 +9,14 @@ public class RMessage implements Message {
     /** Constant used to identify that this message is NOT an ACK. */
     private final String NACK = "1";
 
-    /** Constant used to identify that this message is EOT. */
-    private final String EOT = "-1";
+    /** Constant used to identify that this message is EOT phase 1. */
+    private final String EOT1 = "-1";
+
+    /** Constant used to identify that this message is EOT phase 2. */
+    private final String EOT2 = "-2";
+
+    /** Constant used to identify that this message is EOT phase 3. */
+    private final String EOT3 = "-3";
 
     /** Time used to determine when this message was placed in the queue. */
     private long timeout;
@@ -69,17 +75,36 @@ public class RMessage implements Message {
     } // makeACK()
 
     /** Turns this message into an ACK. */
-    public RMessage makeEOT() {
-        message = EOT + "" + message.substring(1,message.indexOf(':') + 1);
+    public RMessage makeEOT(int phase) {
+        if (phase == 1)
+            message = EOT1+""+message.substring(1,message.indexOf(':')+1);
+        else if (phase == 2)
+            message = EOT2+""+message.substring(1,message.indexOf(':')+1);
+        else if (phase == 3)
+            message = EOT3+""+message.substring(1,message.indexOf(':')+1);
         return this;
     } // makeEOT()
     
-    /** Determines if this message is an EOT or not.
+    /** Determines if this message is an EOT phase 1 or not.
      * @return true if this message is an EOT, otherwise false
      */
-    public boolean isEOT() {
-        return message.substring(0,2).equals(EOT) ? true : false;
-    } // isACK()
+    public boolean isEOT1() {
+        return message.substring(0,2).equals(EOT1) ? true : false;
+    } // isEOT1()
+
+    /** Determines if this message is an EOT phase 2 or not.
+     * @return true if this message is an EOT, otherwise false
+     */
+    public boolean isEOT2() {
+        return message.substring(0,2).equals(EOT2) ? true : false;
+    } // isEOT2()
+
+    /** Determines if this message is an EOT phase 3 or not.
+     * @return true if this message is an EOT, otherwise false
+     */
+    public boolean isEOT3() {
+        return message.substring(0,2).equals(EOT3) ? true : false;
+    } // isEOT3()
 
     /** Prints a message. Used for debugging. */
     public void printMsg() {

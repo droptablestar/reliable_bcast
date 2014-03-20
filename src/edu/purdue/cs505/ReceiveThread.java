@@ -3,6 +3,7 @@ package edu.purdue.cs505;
 import java.io.*;
 import java.net.*;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class ReceiveThread extends Thread {
     /** Socket to use for communication. */
@@ -23,6 +24,9 @@ public class ReceiveThread extends Thread {
     /** Value determining whether or not to continue execution. */
     private boolean stopped;
 
+    /** List of all messages received. */
+    private PriorityQueue<Integer> receivedMsgs;
+
     private boolean done;
     
     /** Constructor for the receive thread. 
@@ -36,8 +40,9 @@ public class ReceiveThread extends Thread {
                          List<RMessage> ackList, List<RMessage> toAck) {
         this.portNumber = portNumber;
         this.rcr = rcr;
-        this.rcr.setAckList(ackList);
-        this.rcr.setToAck(toAck);
+        this.ackList = ackList;
+        this.toAck = toAck;
+        this.receivedMsgs = new PriorityQueue<Integer>();
         this.stopped = false;
         this.done = false;
     } // ReceiveThread()
@@ -48,12 +53,14 @@ public class ReceiveThread extends Thread {
     public void run() {
         try {
             this.socket = new DatagramSocket(portNumber);
+            this.socket.setSoTimeout(500);
             while (!stopped) {
                 byte[] buf = new byte[65536];
                 DatagramPacket packet =
                     new DatagramPacket(buf, buf.length);
 
-                socket.receive(packet);
+                try { socket.receive(packet); }
+                catch (SocketTimeoutException s) { continue; }
                 String msg =
                     new String(packet.getData(), 0, packet.getLength());
 
@@ -73,7 +80,31 @@ public class ReceiveThread extends Thread {
                 //     System.out.println("DONE!");
                 //     done = true;
                 // }
-                rcr.rreceive(finalProduct);
+
+                if (finalProduct.isACK()) { // if msg is ACK add to ackList
+                    ackList.add(finalProduct);
+                    // System.out.print("Received ACK: ");
+                    // finalProduct.printMsg();
+                }
+                // else if (finalProduct.isEOT1()) {
+                //     if (!done) {
+                //         // System.out.print(" done: " + done + "
+                //         //  Received EOT: ");
+                //         // finalProduct.printMsg();
+                //         toAck.add(finalProduct);
+                //     }
+                //     done = true;
+                // }
+                else { // else check to see if its already been received
+                    // System.out.print("Received msg: ");
+                    // finalProduct.printMsg();
+                    if (!receivedMsgs.contains(finalProduct.getMessageID())) {
+                        rcr.rreceive(finalProduct);
+                        // first time a message was received.
+                        receivedMsgs.offer(finalProduct.getMessageID());
+                    }
+                    toAck.add(finalProduct);
+                }
             }
         } catch (IOException e) {
             System.err.println("Init error: ServerThread()");

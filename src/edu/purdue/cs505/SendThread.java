@@ -2,7 +2,7 @@ package edu.purdue.cs505;
 
 import java.io.*;
 import java.net.*;
-import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ public class SendThread extends Thread {
     private final long TIMEOUT = 100;
 
     /** A list which contains messages the sender needs to send. */
-    private PriorityQueue<RMessage> messageQueue;
+    private PriorityBlockingQueue<RMessage> messageQueue;
 
     /** A list which contains messages the receiver has ACK'd. This is how
      * messages will be removed from the sender's queue. Shared across
@@ -46,7 +46,7 @@ public class SendThread extends Thread {
      * @param toAck messages that have been received but need ACKs to be sent
      */
     public SendThread(String destIP, int destPort,
-                      PriorityQueue<RMessage> messageQueue,
+                      PriorityBlockingQueue<RMessage> messageQueue,
                       List<RMessage> ackList, List<RMessage> toAck) {
         this.stopped = false;
         this.messageQueue = messageQueue;
@@ -71,37 +71,48 @@ public class SendThread extends Thread {
      */
     public void run() {
         while (!stopped) {
-            RMessage msg = messageQueue.peek();
             long now = System.currentTimeMillis();
-            while (msg != null && (now - msg.getTimeout()) >= TIMEOUT) {
-                // send message, update timeout, and put it back in queue
-                msg = messageQueue.poll();
+            // synchronized (messageQueue) {
+                RMessage msg = messageQueue.peek();
+                while (msg != null && (now - msg.getTimeout()) >= TIMEOUT) {
+                    // send message, update timeout, and put it back in queue
+                    msg = messageQueue.poll();
 
-                // if this message has already been ACK'd, dont send it again.
-                // remove it from the queue
-                if (removeACK(msg)) {
+                    // if this message has already been ACK'd, dont send it
+                    // again. remove it from the queue
+                    if (removeACK(msg)) {
+                        msg = messageQueue.peek();
+                        continue;
+                    }
+
+                    send(msg);
+                    msg.setTimeout();
+                    // System.out.print("Retransmitting: "); msg.printMsg();
+                    messageQueue.offer(msg);
                     msg = messageQueue.peek();
-                    continue;
                 }
-
-                send(msg);
-                msg.setTimeout();
-                messageQueue.offer(msg);
-                msg = messageQueue.peek();
-            }
-
+            // }
             /* send ACKs. they are stored in toAck. */
             synchronized(toAck) {
                 for (Iterator<RMessage> ai=toAck.iterator(); ai.hasNext(); ) {
                     RMessage m = ai.next();
-                    if (m.isEOT()) send(m);
+                    // if (m.isEOT1()) send(m);
                     m.makeACK();
                     send(m);
                     ai.remove();
+                    // System.out.print("ACKing: "); m.printMsg();
                 }
             }
             // System.out.println("msg: " + msg);
             // if (msg == null) kill();
+            Iterator<RMessage> mi=messageQueue.iterator();
+            synchronized(messageQueue) {
+                while (mi.hasNext()) {
+                    RMessage m = mi.next();
+                    if (removeACK(m))
+                        mi.remove();
+                }
+            }
         }
         System.out.println("SENDER OUT!");
     } // run()
@@ -141,6 +152,7 @@ public class SendThread extends Thread {
         synchronized(ackList) {
             for (Iterator<RMessage> ai=ackList.iterator(); ai.hasNext(); ) {
                 RMessage m = ai.next();
+                // m.printMsg();
                 if (msg.getMessageID() == m.getMessageID()) {
                     ai.remove();
                     // System.out.print("REMOVING!");
@@ -156,8 +168,8 @@ public class SendThread extends Thread {
     public int messageQueueSize() { return this.messageQueue.size(); }
 
     public boolean isDone() {
-        // System.out.println("MQ: " + messageQueue.size() + " AS: " +
-        //                    toAck.size() + " AL: " + ackList.size());
+        System.out.println("MQ: " + messageQueue.size() + " AS: " +
+                           toAck.size() + " AL: " + ackList.size());
         return (messageQueue.size() == 0 && toAck.size() == 0) ?  true : false;
     }
 }
