@@ -1,0 +1,49 @@
+<project name="rel_channel" default="build" basedir=".">
+
+  <target name="init" description="Creates the classes directory">
+    <mkdir dir="dist/" />
+    <mkdir dir="classes/edu/purdue/cs505/" />
+  </target>
+
+  <target name="build" depends="init" description="Compiles the source code">
+    <javac includeantruntime="false" srcdir="src/"
+	   includes="**/*.java" destdir="classes" />
+  </target>
+
+  <target name="jar" depends="build" description="Builds the jar file">
+    <jar destfile="dist/rchannel.jar">
+      <fileset dir="classes"/>
+      <manifest>
+	<attribute name="Main-Class" value="edu.purdue.cs505.Node"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- START DEBUGGING -->
+  <target name="buildd" depends="init" description="Compiles the source code">
+    <javac includeantruntime="false" srcdir="src/" debug="true"
+	   includes="**/*.java" destdir="classes" />
+  </target>
+
+  <target name="jard" depends="buildd" description="Builds the jar file">
+    <jar destfile="dist/rchannel.jar">
+      <fileset dir="classes"/>
+      <manifest>
+	<attribute name="Main-Class" value="edu.purdue.cs505.Node"/>
+      </manifest>
+    </jar>
+  </target>
+  <!-- END DEBUGGING -->
+
+  <target name="doc" description="Produces the Java documentation">
+    <mkdir dir="docs"/>
+    <javadoc sourcepath="src/" destdir="docs" access="private" />
+  </target>
+
+<target name="clean" description="Removes all class files">
+    <delete dir="dist/" />
+    <delete dir="classes/" />
+    <delete dir="docs/" />
+  </target>
+
+</project>
