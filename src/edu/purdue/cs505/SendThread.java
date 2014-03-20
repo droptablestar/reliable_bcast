@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class SendThread extends Thread {
     /** amount of  time (in ms) to wait before resending a message */
-    private final long TIMEOUT = 500;
+    private final long TIMEOUT = 100;
 
     /** A list which contains messages the sender needs to send. */
     private PriorityQueue<RMessage> messageQueue;
@@ -143,9 +143,9 @@ public class SendThread extends Thread {
                 RMessage m = ai.next();
                 if (msg.getMessageID() == m.getMessageID()) {
                     ai.remove();
-                    System.out.print("REMOVING!");
-                    System.out.println("msg: "+msg.getMessageID() + " m: " +
-                                       m.getMessageID());
+                    // System.out.print("REMOVING!");
+                    // System.out.println("msg: "+msg.getMessageID() + " m: " +
+                    //                    m.getMessageID());
                     removed = true;
                 }
             }
@@ -156,8 +156,8 @@ public class SendThread extends Thread {
     public int messageQueueSize() { return this.messageQueue.size(); }
 
     public boolean isDone() {
-        System.out.println("MQ: " + messageQueue.size() + " AS: " +
-                           toAck.size() + " AL: " + ackList.size());
+        // System.out.println("MQ: " + messageQueue.size() + " AS: " +
+        //                    toAck.size() + " AL: " + ackList.size());
         return (messageQueue.size() == 0 && toAck.size() == 0) ?  true : false;
     }
 }

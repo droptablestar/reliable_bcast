@@ -26,13 +26,13 @@ public class Node {
             //     channel.halt();
             //     done = true;
             // }
-            System.out.println("SENDER: " + channel.sThread.isDone());
-            System.out.println("RECEIVER: " + channel.rThread.isDone());
+            // System.out.println("SENDER: " + channel.sThread.isDone());
+            // System.out.println("RECEIVER: " + channel.rThread.isDone());
             if (channel.sThread.isDone() && channel.rThread.isDone()) {
                 channel.halt();
                 channel.haltR();
                 done = true;
-                System.out.println("NODE DONE!");
+                // System.out.println("NODE DONE!");
             }
             try { Thread.sleep(100); }
             catch (InterruptedException e) {System.out.println("sleep: "+e);}
