@@ -97,6 +97,8 @@ public class SendThread extends Thread {
                 for (Iterator<RMessage> ai=toAck.iterator(); ai.hasNext(); ) {
                     RMessage m = ai.next();
                     // if (m.isEOT1()) send(m);
+                    removeACK(m);
+                    messageQueue.remove(m);
                     m.makeACK();
                     send(m);
                     ai.remove();
@@ -105,14 +107,14 @@ public class SendThread extends Thread {
             }
             // System.out.println("msg: " + msg);
             // if (msg == null) kill();
-            Iterator<RMessage> mi=messageQueue.iterator();
-            synchronized(messageQueue) {
-                while (mi.hasNext()) {
-                    RMessage m = mi.next();
-                    if (removeACK(m))
-                        mi.remove();
-                }
-            }
+            // synchronized(messageQueue) {
+            //     Iterator<RMessage> mi=messageQueue.iterator();
+            //     while (mi.hasNext()) {
+            //         RMessage m = mi.next();
+            //         if (removeACK(m))
+            //             mi.remove();
+            //     }
+            // }
         }
         System.out.println("SENDER OUT!");
     } // run()
@@ -152,7 +154,8 @@ public class SendThread extends Thread {
         synchronized(ackList) {
             for (Iterator<RMessage> ai=ackList.iterator(); ai.hasNext(); ) {
                 RMessage m = ai.next();
-                // m.printMsg();
+                // System.out.println("id: "+msg.getMessageID()+" id: "+
+                //                    m.getMessageID());
                 if (msg.getMessageID() == m.getMessageID()) {
                     ai.remove();
                     // System.out.print("REMOVING!");
@@ -168,8 +171,8 @@ public class SendThread extends Thread {
     public int messageQueueSize() { return this.messageQueue.size(); }
 
     public boolean isDone() {
-        System.out.println("MQ: " + messageQueue.size() + " AS: " +
-                           toAck.size() + " AL: " + ackList.size());
+        // System.out.println("MQ: " + messageQueue.size() + " AS: " +
+        //                    toAck.size() + " AL: " + ackList.size());
         return (messageQueue.size() == 0 && toAck.size() == 0) ?  true : false;
     }
 }
