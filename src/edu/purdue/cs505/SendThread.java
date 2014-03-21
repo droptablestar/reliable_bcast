@@ -94,11 +94,14 @@ public class SendThread extends Thread {
             // }
             /* send ACKs. they are stored in toAck. */
             synchronized(toAck) {
-                for (Iterator<RMessage> ai=toAck.iterator(); ai.hasNext(); ) {
+                Iterator<RMessage> ai = toAck.iterator();
+                while (ai.hasNext()) {
                     RMessage m = ai.next();
+                    System.out.print("ACKING: ");
+                    m.printMsg();
                     // if (m.isEOT1()) send(m);
                     removeACK(m);
-                    messageQueue.remove(m);
+                    removeFromQueue(messageQueue, m);
                     m.makeACK();
                     send(m);
                     ai.remove();
@@ -171,8 +174,21 @@ public class SendThread extends Thread {
     public int messageQueueSize() { return this.messageQueue.size(); }
 
     public boolean isDone() {
-        // System.out.println("MQ: " + messageQueue.size() + " AS: " +
-        //                    toAck.size() + " AL: " + ackList.size());
+        System.out.println("MQ: " + messageQueue.size() + " TO: " +
+                           toAck.size() + " AL: " + ackList.size());
         return (messageQueue.size() == 0 && toAck.size() == 0) ?  true : false;
+    }
+
+    private void removeFromQueue(PriorityBlockingQueue<RMessage> mq,
+                                 RMessage m) {
+        Iterator<RMessage> mi = mq.iterator();
+        while (mi.hasNext()) {
+            if (m.getMessageID() == (mi.next()).getMessageID()) {
+                System.out.print("Removing: ");
+                m.printMsg();
+                mi.remove();
+                break;
+            }
+        }
     }
 }

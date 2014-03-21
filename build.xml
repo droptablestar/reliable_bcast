@@ -1,4 +1,4 @@
-<project name="rel_channel" default="build" basedir=".">
+<project name="rel_bcast" default="build" basedir=".">
 
   <target name="init" description="Creates the classes directory">
     <mkdir dir="dist/" />
@@ -21,8 +21,9 @@
 
   <!-- START DEBUGGING -->
   <target name="buildd" depends="init" description="Compiles the source code">
-    <javac includeantruntime="false" srcdir="src/" debug="true"
-	   includes="**/*.java" destdir="classes" />
+    <javac includeantruntime="false" srcdir="src/edu/purdue/cs505/"
+	   debug="yes" deprecation="yes" destdir="classes">
+    </javac>
   </target>
 
   <target name="jard" depends="buildd" description="Builds the jar file">

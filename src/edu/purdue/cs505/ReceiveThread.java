@@ -82,7 +82,10 @@ public class ReceiveThread extends Thread {
                 // }
 
                 if (finalProduct.isACK()) { // if msg is ACK add to ackList
-                    ackList.add(finalProduct);
+                    synchronized(ackList) {
+                        if (ackList.size() <= 2000)
+                            ackList.add(finalProduct);
+                    }
                     // System.out.print("Received ACK: ");
                     // finalProduct.printMsg();
                 }
@@ -122,7 +125,7 @@ public class ReceiveThread extends Thread {
     } // kill()
 
     public boolean isDone() {
-        // System.out.println("TA: "+ rcr.toAck.size());
+        System.out.println("TO: " + toAck.size() + " AL: " + ackList.size());
         return done;
     }
 }
