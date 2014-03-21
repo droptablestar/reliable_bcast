@@ -27,6 +27,8 @@ public class RChannel implements ReliableChannel {
      * top of the queue.*/
     public PriorityBlockingQueue<RMessage> messageQueue;
 
+    public List<RMessage> waitList;
+
     /** The 'machine' id of a node. Used to generate unique port numbers
      * for local testing. */
     private int id;
@@ -41,6 +43,7 @@ public class RChannel implements ReliableChannel {
         messageQueue = new PriorityBlockingQueue<RMessage>(10, comparator);
         ackList = Collections.synchronizedList(new ArrayList<RMessage>());
         toAck = Collections.synchronizedList(new ArrayList<RMessage>());
+        waitList = Collections.synchronizedList(new ArrayList<RMessage>());
         this.id = id;
     } // RChannel()
 
@@ -53,7 +56,7 @@ public class RChannel implements ReliableChannel {
     public void init(String destinationIP, int destinationPort) {
         int dest = destinationPort == (6666+id) ? 6667 : 6666;
         sThread = new SendThread(destinationIP, dest, messageQueue,
-                                 ackList, toAck);
+                                 ackList, toAck, waitList);
         sThread.start();
     } // init()
 
@@ -63,9 +66,10 @@ public class RChannel implements ReliableChannel {
      * @param m the message to be sent.
      */
     public void rsend(Message m) {
-        synchronized(messageQueue) {
+        if (messageQueue.size() < sThread.MAX_QUEUE)
             messageQueue.offer((RMessage)m);
-        }
+        else
+            waitList.add((RMessage)m);
     } // rsend()
 
     /** Spawns a new receiver thread.

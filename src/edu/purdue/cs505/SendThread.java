@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 public class SendThread extends Thread {
+    public static final int MAX_QUEUE = 2000;
+    
     /** amount of  time (in ms) to wait before resending a message */
     private final long TIMEOUT = 100;
 
@@ -22,6 +24,8 @@ public class SendThread extends Thread {
     /** A list which contains messages the sender thread needs to send ACKs
      *  for. Shared across threads. */
     private List<RMessage> toAck;
+
+    private List<RMessage> waitList;
 
     /** The socket to be used for communication in this thread. */
     private DatagramSocket socket;
@@ -47,11 +51,13 @@ public class SendThread extends Thread {
      */
     public SendThread(String destIP, int destPort,
                       PriorityBlockingQueue<RMessage> messageQueue,
-                      List<RMessage> ackList, List<RMessage> toAck) {
+                      List<RMessage> ackList, List<RMessage> toAck,
+                      List<RMessage> waitList) {
         this.stopped = false;
         this.messageQueue = messageQueue;
         this.ackList = ackList;
         this.toAck = toAck;
+        this.waitList = waitList;
         this.destPort = destPort;
         
         try {
@@ -72,52 +78,55 @@ public class SendThread extends Thread {
     public void run() {
         while (!stopped) {
             long now = System.currentTimeMillis();
-            // synchronized (messageQueue) {
-                RMessage msg = messageQueue.peek();
-                while (msg != null && (now - msg.getTimeout()) >= TIMEOUT) {
-                    // send message, update timeout, and put it back in queue
-                    msg = messageQueue.poll();
-
-                    // if this message has already been ACK'd, dont send it
-                    // again. remove it from the queue
-                    if (removeACK(msg)) {
-                        msg = messageQueue.peek();
-                        continue;
-                    }
-
-                    send(msg);
-                    msg.setTimeout();
-                    // System.out.print("Retransmitting: "); msg.printMsg();
-                    messageQueue.offer(msg);
+            RMessage msg = messageQueue.peek();
+            while (msg != null && (now - msg.getTimeout()) >= TIMEOUT) {
+                // send message, update timeout, and put it back in queue
+                msg = messageQueue.poll();
+                
+                // if this message has already been ACK'd, dont send it
+                // again. remove it from the queue
+                if (removeACK(msg)) {
                     msg = messageQueue.peek();
+                    continue;
                 }
-            // }
+                
+                send(msg);
+                msg.setTimeout();
+                // System.out.print("Retransmitting: "); msg.printMsg();
+                messageQueue.offer(msg);
+                msg = messageQueue.peek();
+            }
+            int mq_size = messageQueue.size();
+            if (mq_size < MAX_QUEUE && waitList.size() > 0) {
+                int diff = MAX_QUEUE - messageQueue.size();
+                Iterator<RMessage> wi = waitList.iterator();
+                while (wi.hasNext() && (diff--) >= 0) {
+                    messageQueue.offer(wi.next());
+                    wi.remove();
+                }
+            }
             /* send ACKs. they are stored in toAck. */
             synchronized(toAck) {
                 Iterator<RMessage> ai = toAck.iterator();
                 while (ai.hasNext()) {
                     RMessage m = ai.next();
-                    System.out.print("ACKING: ");
-                    m.printMsg();
+                    // System.out.print("ACKING: ");
+                    // m.printMsg();
                     // if (m.isEOT1()) send(m);
-                    removeACK(m);
-                    removeFromQueue(messageQueue, m);
+                    // removeACK(m);
+                    // removeFromQueue(messageQueue, m);
                     m.makeACK();
                     send(m);
                     ai.remove();
                     // System.out.print("ACKing: "); m.printMsg();
                 }
             }
-            // System.out.println("msg: " + msg);
-            // if (msg == null) kill();
-            // synchronized(messageQueue) {
-            //     Iterator<RMessage> mi=messageQueue.iterator();
-            //     while (mi.hasNext()) {
-            //         RMessage m = mi.next();
-            //         if (removeACK(m))
-            //             mi.remove();
-            //     }
-            // }
+            Iterator<RMessage> mi=messageQueue.iterator();
+            while (mi.hasNext()) {
+                RMessage m = mi.next();
+                if (removeACK(m))
+                    mi.remove();
+            }
         }
         System.out.println("SENDER OUT!");
     } // run()
@@ -174,8 +183,8 @@ public class SendThread extends Thread {
     public int messageQueueSize() { return this.messageQueue.size(); }
 
     public boolean isDone() {
-        System.out.println("MQ: " + messageQueue.size() + " TO: " +
-                           toAck.size() + " AL: " + ackList.size());
+        // System.out.println("MQ: " + messageQueue.size() + " TO: " +
+        //                    toAck.size() + " AL: " + ackList.size());
         return (messageQueue.size() == 0 && toAck.size() == 0) ?  true : false;
     }
 
