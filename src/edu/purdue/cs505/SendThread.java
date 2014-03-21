@@ -113,8 +113,6 @@ public class SendThread extends Thread {
                     // System.out.print("ACKING: ");
                     // m.printMsg();
                     // if (m.isEOT1()) send(m);
-                    // removeACK(m);
-                    // removeFromQueue(messageQueue, m);
                     m.makeACK();
                     send(m);
                     ai.remove();
@@ -186,18 +184,5 @@ public class SendThread extends Thread {
         // System.out.println("MQ: " + messageQueue.size() + " TO: " +
         //                    toAck.size() + " AL: " + ackList.size());
         return (messageQueue.size() == 0 && toAck.size() == 0) ?  true : false;
-    }
-
-    private void removeFromQueue(PriorityBlockingQueue<RMessage> mq,
-                                 RMessage m) {
-        Iterator<RMessage> mi = mq.iterator();
-        while (mi.hasNext()) {
-            if (m.getMessageID() == (mi.next()).getMessageID()) {
-                System.out.print("Removing: ");
-                m.printMsg();
-                mi.remove();
-                break;
-            }
-        }
     }
 }

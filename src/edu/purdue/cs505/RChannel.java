@@ -32,19 +32,20 @@ public class RChannel implements ReliableChannel {
     /** The 'machine' id of a node. Used to generate unique port numbers
      * for local testing. */
     private int id;
+    private int port;
 
     /** Constructor which initializes the messageQueue, ackList, and toAck
      * lists  for a Node.
      *
      * @param id unique machine id for this node.
      */
-    public RChannel(int id) {
+    public RChannel() {
         Comparator<RMessage> comparator = new RMessageComparator();
         messageQueue = new PriorityBlockingQueue<RMessage>(10, comparator);
         ackList = Collections.synchronizedList(new ArrayList<RMessage>());
         toAck = Collections.synchronizedList(new ArrayList<RMessage>());
         waitList = Collections.synchronizedList(new ArrayList<RMessage>());
-        this.id = id;
+        // this.id = id;
     } // RChannel()
 
     /** Sets up the sender thread. One thread will be spawned for each
@@ -54,8 +55,8 @@ public class RChannel implements ReliableChannel {
      * @param destinationPort the port on the destination node to be sent to.
      */     
     public void init(String destinationIP, int destinationPort) {
-        int dest = destinationPort == (6666+id) ? 6667 : 6666;
-        sThread = new SendThread(destinationIP, dest, messageQueue,
+        this.port = destinationPort;
+        sThread = new SendThread(destinationIP, destinationPort, messageQueue,
                                  ackList, toAck, waitList);
         sThread.start();
     } // init()
@@ -77,7 +78,7 @@ public class RChannel implements ReliableChannel {
      * @param rcr the RChannelReceiver callback to be used.
      */
     public void rlisten(ReliableChannelReceiver rcr) {
-        rThread = new ReceiveThread(6666 + this.id, (RChannelReceiver)rcr,
+        rThread = new ReceiveThread(this.port, (RChannelReceiver)rcr,
                                     ackList, toAck);
         rThread.start();
     } // rlisten()

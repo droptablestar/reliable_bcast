@@ -5,13 +5,13 @@ import java.util.Iterator;
 
 public class Node {
     public static void main(String args[]) {
-        int id = Integer.parseInt(args[1]);
+        int port = Integer.parseInt(args[1]);
 
         RChannelReceiver rcr = new RChannelReceiver();
-        RChannel channel = new RChannel(id);
-        channel.init(args[0], 6666);
+        RChannel channel = new RChannel();
+        channel.init(args[0], port);
         channel.rlisten(rcr);
-        if (id == 0) {
+        if (port == 6666) {
             for (int i=0; i<100000; i++)
                 channel.rsend(new RMessage(new Integer(i).toString()));
             channel.rsend((new RMessage(
