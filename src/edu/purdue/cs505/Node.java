@@ -5,18 +5,25 @@ import java.util.Iterator;
 
 public class Node {
     public static void main(String args[]) {
-        int port = Integer.parseInt(args[1]);
+        if (args.length < 3) {
+            System.out.println("Usage: java -jar dist/rchannel.jar "+
+                               "<destinationIP> <sendPort> <receivePort>");
+            System.exit(-1);
+        }
+                               
+            
+        int sendPort = Integer.parseInt(args[1]);
 
         RChannelReceiver rcr = new RChannelReceiver();
-        RChannel channel = new RChannel();
-        channel.init(args[0], port);
+        RChannel channel = new RChannel(Integer.parseInt(args[2]));
+        channel.init(args[0], sendPort);
         channel.rlisten(rcr);
-        if (port == 6666) {
+        if (sendPort == 6666) {
             for (int i=0; i<100000; i++)
                 channel.rsend(new RMessage(new Integer(i).toString()));
-            channel.rsend((new RMessage(
-                               new Integer(100001).toString())
-                           ).makeEOT(1));
+            // channel.rsend((new RMessage(
+            //                    new Integer(100001).toString())
+            //                ).makeEOT(1));
         }
         boolean done = false;
         while (!done) {
@@ -37,33 +44,5 @@ public class Node {
             try { Thread.sleep(100); }
             catch (InterruptedException e) {System.out.println("sleep: "+e);}
         }
-        // BufferedReader br =
-        //     new BufferedReader(new InputStreamReader(System.in));
-        // if (id == 0) {
-        //     try {
-        //         String msg;
-        //         while ((msg = br.readLine()) != null)
-        //             channel.rsend(new RMessage(msg));
-        //     } catch(IOException e) {
-        //         System.err.println("IO err: " + e);
-        //     }
-        // }
-
-        // channel.halt();
-
-        // channel.init(args[0], 6666);
-        // if (id == 0) {
-        //     try {
-        //         String msg;
-        //         while ((msg = br.readLine()) != null)
-        //             channel.rsend(new RMessage(msg));
-        //         System.out.print("PRESS ENTER FOO!! ");
-        //         br.readLine();
-        //     } catch(IOException e) {
-        //         System.err.println("IO err: " + e);
-        //     }
-        // }
-        // System.out.print("\nHALT\n");
-        // channel.halt();
     }
 }

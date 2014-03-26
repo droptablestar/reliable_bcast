@@ -2,7 +2,7 @@ package edu.purdue.cs505;
 
 import java.io.*;
 import java.net.*;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.PriorityQueue;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class SendThread extends Thread {
     private final long TIMEOUT = 100;
 
     /** A list which contains messages the sender needs to send. */
-    private PriorityBlockingQueue<RMessage> messageQueue;
+    private PriorityQueue<RMessage> messageQueue;
 
     /** A list which contains messages the receiver has ACK'd. This is how
      * messages will be removed from the sender's queue. Shared across
@@ -50,7 +50,7 @@ public class SendThread extends Thread {
      * @param toAck messages that have been received but need ACKs to be sent
      */
     public SendThread(String destIP, int destPort,
-                      PriorityBlockingQueue<RMessage> messageQueue,
+                      PriorityQueue<RMessage> messageQueue,
                       List<RMessage> ackList, List<RMessage> toAck,
                       List<RMessage> waitList) {
         this.stopped = false;
@@ -63,7 +63,7 @@ public class SendThread extends Thread {
         try {
             this.destIP = InetAddress.getByName(destIP);
             socket = new DatagramSocket();
-            socket.connect(this.destIP, this.destPort);
+            // socket.connect(this.destIP, this.destPort);
         } catch (UnknownHostException e) {
             System.err.println("SENDER -- Host name error: " + e);
             System.exit(1);
@@ -98,13 +98,17 @@ public class SendThread extends Thread {
             }
             int mq_size = messageQueue.size();
             if (mq_size < MAX_QUEUE && waitList.size() > 0) {
-                int diff = MAX_QUEUE - messageQueue.size();
-                Iterator<RMessage> wi = waitList.iterator();
-                while (wi.hasNext() && (diff--) >= 0) {
-                    messageQueue.offer(wi.next());
-                    wi.remove();
+                int diff = MAX_QUEUE - mq_size;
+                synchronized(waitList) {
+                    Iterator<RMessage> wi = waitList.iterator();
+                    while (wi.hasNext() && (diff--) >= 0) {
+                        // System.out.println("ADDING " + diff);
+                        messageQueue.offer(wi.next());
+                        wi.remove();
+                    }
                 }
             }
+
             /* send ACKs. they are stored in toAck. */
             synchronized(toAck) {
                 Iterator<RMessage> ai = toAck.iterator();
@@ -119,11 +123,14 @@ public class SendThread extends Thread {
                     // System.out.print("ACKing: "); m.printMsg();
                 }
             }
+
             Iterator<RMessage> mi=messageQueue.iterator();
             while (mi.hasNext()) {
                 RMessage m = mi.next();
-                if (removeACK(m))
+                if (removeACK(m)) {
+                    // System.out.println("REMOVING");
                     mi.remove();
+                }
             }
         }
         System.out.println("SENDER OUT!");

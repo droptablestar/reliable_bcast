@@ -1,7 +1,7 @@
 package edu.purdue.cs505;
 
 import java.util.Comparator;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.PriorityQueue;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
@@ -25,27 +25,25 @@ public class RChannel implements ReliableChannel {
     /** A list which contains messages the sender needs to send. These are
      * sorted on timeout values with the smallest timeout value being the
      * top of the queue.*/
-    public PriorityBlockingQueue<RMessage> messageQueue;
+    public PriorityQueue<RMessage> messageQueue;
 
     public List<RMessage> waitList;
 
-    /** The 'machine' id of a node. Used to generate unique port numbers
-     * for local testing. */
-    private int id;
-    private int port;
+    private int sendPort;
+    private int receivePort;
 
     /** Constructor which initializes the messageQueue, ackList, and toAck
      * lists  for a Node.
      *
      * @param id unique machine id for this node.
      */
-    public RChannel() {
+    public RChannel(int receivePort) {
         Comparator<RMessage> comparator = new RMessageComparator();
-        messageQueue = new PriorityBlockingQueue<RMessage>(10, comparator);
+        messageQueue = new PriorityQueue<RMessage>(10, comparator);
         ackList = Collections.synchronizedList(new ArrayList<RMessage>());
         toAck = Collections.synchronizedList(new ArrayList<RMessage>());
         waitList = Collections.synchronizedList(new ArrayList<RMessage>());
-        // this.id = id;
+        this.receivePort = receivePort;
     } // RChannel()
 
     /** Sets up the sender thread. One thread will be spawned for each
@@ -54,9 +52,9 @@ public class RChannel implements ReliableChannel {
      * @param destinationIP the IP address of the node to be sent to.
      * @param destinationPort the port on the destination node to be sent to.
      */     
-    public void init(String destinationIP, int destinationPort) {
-        this.port = destinationPort;
-        sThread = new SendThread(destinationIP, destinationPort, messageQueue,
+    public void init(String destinationIP, int sendPort) {
+        this.sendPort = sendPort;
+        sThread = new SendThread(destinationIP, sendPort, messageQueue,
                                  ackList, toAck, waitList);
         sThread.start();
     } // init()
@@ -67,10 +65,10 @@ public class RChannel implements ReliableChannel {
      * @param m the message to be sent.
      */
     public void rsend(Message m) {
-        if (messageQueue.size() < sThread.MAX_QUEUE)
-            messageQueue.offer((RMessage)m);
-        else
-            waitList.add((RMessage)m);
+        // if (messageQueue.size() < sThread.MAX_QUEUE) {
+        //         messageQueue.offer((RMessage)m);
+        // else
+        waitList.add((RMessage)m);
     } // rsend()
 
     /** Spawns a new receiver thread.
@@ -78,7 +76,7 @@ public class RChannel implements ReliableChannel {
      * @param rcr the RChannelReceiver callback to be used.
      */
     public void rlisten(ReliableChannelReceiver rcr) {
-        rThread = new ReceiveThread(this.port, (RChannelReceiver)rcr,
+        rThread = new ReceiveThread(receivePort, (RChannelReceiver)rcr,
                                     ackList, toAck);
         rThread.start();
     } // rlisten()
