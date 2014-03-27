@@ -100,8 +100,8 @@ public class ReceiveThread extends Thread {
                 //     done = true;
                 // }
                 else { // else check to see if its already been received
-                    // System.out.print("Received msg: ");
-                    // finalProduct.printMsg();
+                    System.out.print("Received msg: ");
+                    finalProduct.printMsg();
                     if (!receivedMsgs.contains(finalProduct.getMessageID())) {
                         rcr.rreceive(finalProduct);
                         // first time a message was received.

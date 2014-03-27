@@ -80,6 +80,7 @@ public class SendThread extends Thread {
             long now = System.currentTimeMillis();
             Message msg = messageQueue.peek();
             while (msg != null && (now - msg.getTimeout()) >= TIMEOUT) {
+                //System.out.println("Processessesing a message");
                 // send message, update timeout, and put it back in queue
                 msg = messageQueue.poll();
                 
@@ -92,7 +93,7 @@ public class SendThread extends Thread {
                 
                 send(msg);
                 msg.setTimeout();
-                // System.out.print("Retransmitting: "); msg.printMsg();
+                System.out.print(destPort + "Retransmitting: "); msg.printMsg();
                 messageQueue.offer(msg);
                 msg = messageQueue.peek();
             }
@@ -114,7 +115,7 @@ public class SendThread extends Thread {
                 Iterator<Message> ai = toAck.iterator();
                 while (ai.hasNext()) {
                     Message m = ai.next();
-                    // System.out.print("ACKING: ");
+                    //System.out.print("ACKING: ");
                     // m.printMsg();
                     // if (m.isEOT1()) send(m);
                     m.makeACK();
@@ -128,7 +129,7 @@ public class SendThread extends Thread {
             while (mi.hasNext()) {
                 Message m = mi.next();
                 if (removeACK(m)) {
-                    // System.out.println("REMOVING");
+                    //System.out.println("REMOVING");
                     mi.remove();
                 }
             }

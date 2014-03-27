@@ -36,7 +36,11 @@ public class RBroadcast implements ReliableBroadcast {
             Process p = pi.next();
             System.out.println("Broadcasting: " + m.getContents() +
                                " to: " + p.getIP() + " : " + p.getPort());
+            
         }
+	for (Iterator<RChannel> ci=channels.iterator(); ci.hasNext(); )
+            ci.next().rsend(m);
+        
     }
 
     public void rblisten(BroadcastReceiver m) {

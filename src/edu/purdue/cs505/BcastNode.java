@@ -26,24 +26,29 @@ public class BcastNode {
             Process p = processes.get(i);
             b.init(p);
 
-            for (int j=0; j<MAX_PROCS; j++) 
-                if (i != j) 
-                    b.addProcess(p);
+            for (int j=0; j<MAX_PROCS; j++){
+                if (i != j){
+                    Process pp = processes.get(j); 
+                    b.addProcess(pp);
+                }
+            }
         }
 
         for (int i=0; i<MAX_PROCS; i++) {
             System.out.println("Process list for: " + i);
             bcasts.get(i).printProcesses();
             System.out.println();
-            bcasts.get(i).halt();
+            //bcasts.get(i).halt();
         }
 
         for (int i=0; i<MAX_PROCS; i++) {
             bcasts.get(i).rblisten(new BcastReceiver());
         }
+
+        bcasts.get(0).rbroadcast(new Message(new Integer(0).toString()));
         for (int i=0; i<MAX_PROCS; i++) {
-            bcasts.get(i).haltR();
-            bcasts.get(i).halt();
+            //bcasts.get(i).haltR();
+            //bcasts.get(i).halt();
         }
     }
 }
