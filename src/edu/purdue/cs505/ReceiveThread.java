@@ -3,7 +3,7 @@ package edu.purdue.cs505;
 import java.io.*;
 import java.net.*;
 import java.util.List;
-import java.util.PriorityQueue;
+import java.util.HashMap;
 
 public class ReceiveThread extends Thread {
     /** Socket to use for communication. */
@@ -25,7 +25,7 @@ public class ReceiveThread extends Thread {
     private boolean stopped;
 
     /** List of all messages received. */
-    private PriorityQueue<Integer> receivedMsgs;
+    private HashMap<String, Integer> receivedMsgs;
 
     private boolean done;
     
@@ -42,7 +42,7 @@ public class ReceiveThread extends Thread {
         this.rcr = rcr;
         this.ackList = ackList;
         this.toAck = toAck;
-        this.receivedMsgs = new PriorityQueue<Integer>();
+        this.receivedMsgs = new HashMap<String, Integer>();
         this.stopped = false;
         this.done = false;
     } // ReceiveThread()
@@ -102,10 +102,10 @@ public class ReceiveThread extends Thread {
                 else { // else check to see if its already been received
                     System.out.print(portNumber + ": Received msg: ");
                     finalProduct.printMsg();
-                    if (!receivedMsgs.contains(finalProduct.getMessageID())) {
+                    if (!receivedMsgs.containsKey(finalProduct.getProcessID())) {
                         rcr.rreceive(finalProduct);
                         // first time a message was received.
-                        receivedMsgs.offer(finalProduct.getMessageID());
+                        receivedMsgs.put(finalProduct.getProcessID(), 1);
                     }
                     toAck.add(finalProduct);
                 }
