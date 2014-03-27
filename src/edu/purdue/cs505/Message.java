@@ -111,9 +111,6 @@ public class Message {
     public int getMessageNumber() { return messageNumber; }
     public void setMessageNumber(int num) { this.messageNumber = num; }
 
-    public String getProcessID() { return processID; }
-    public void setProcessID(String processID) { this.processID = processID; }
-
     public int getSourcePort() { return header.getSourcePort(); }
     public void setSourcePort(int port) { this.header.setSourcePort(port); }
 
@@ -129,8 +126,8 @@ public class Message {
     public long getTimeout() { return header.getTimeout(); }
     public void setTimeout() { this.header.setTimeout(); }
 
-    public int getMessageID() { return messageID; }
-    public int setMessageID(String messageID) { this.messageID = messageID; }
+    public String getProcessID() { return processID; }
+    public void setProcessID(String messageID) { this.processID = processID; }
 
     public void stripHeader() {
         int typeOfMessage, thisSeqNum;

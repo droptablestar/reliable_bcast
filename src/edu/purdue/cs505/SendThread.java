@@ -215,9 +215,9 @@ public class SendThread extends Thread {
         synchronized(ackList) {
             for (Iterator<Message> ai=ackList.iterator(); ai.hasNext(); ) {
                 Message m = ai.next();
-                System.out.println("id: "+msg.getMessageID()+" id: "+
-                                   m.getMessageID());
-                if (msg.getMessageID() == m.getMessageID()) {
+                System.out.println("id: "+msg.getProcessID()+" id: "+
+                                   m.getProcessID());
+                if (msg.getProcessID() == m.getProcessID()) {
                     ai.remove();
                     // System.out.print("REMOVING!");
                     // System.out.println("msg: "+msg.getMessageID() + " m: " +
