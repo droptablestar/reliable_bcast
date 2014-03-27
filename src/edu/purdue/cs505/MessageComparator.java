@@ -4,9 +4,9 @@ import java.util.Comparator;
 
 /** Implementation of the Comparator interface. This is used for inserting
  * messages into a PriorityQueue which is sorted on timeout values. */
-public class RMessageComparator implements Comparator<RMessage> {
+public class MessageComparator implements Comparator<Message> {
     @Override
-    public int compare(RMessage m1, RMessage m2) {
+    public int compare(Message m1, Message m2) {
         if (m1 == null && m2 == null) return 0;
         if (m1 == null || m2 == null) return m1 == null ? 1 : -1;
 

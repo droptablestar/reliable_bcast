@@ -16,18 +16,18 @@ public class RChannel implements ReliableChannel {
     /** A list which contains messages the receiver has ACK'd. This is how
      * messages will be removed from the sender's queue. Shared across
      * threads. */
-    public List<RMessage> ackList;
+    public List<Message> ackList;
 
     /** A list which contains messages the sender thread needs to send ACKs
      *  for. Shared across threads. */
-    public List<RMessage> toAck;
+    public List<Message> toAck;
 
     /** A list which contains messages the sender needs to send. These are
      * sorted on timeout values with the smallest timeout value being the
      * top of the queue.*/
-    public PriorityQueue<RMessage> messageQueue;
+    public PriorityQueue<Message> messageQueue;
 
-    public List<RMessage> waitList;
+    public List<Message> waitList;
 
     private int sendPort;
     private int receivePort;
@@ -38,11 +38,11 @@ public class RChannel implements ReliableChannel {
      * @param id unique machine id for this node.
      */
     public RChannel(int receivePort) {
-        Comparator<RMessage> comparator = new RMessageComparator();
-        messageQueue = new PriorityQueue<RMessage>(10, comparator);
-        ackList = Collections.synchronizedList(new ArrayList<RMessage>());
-        toAck = Collections.synchronizedList(new ArrayList<RMessage>());
-        waitList = Collections.synchronizedList(new ArrayList<RMessage>());
+        Comparator<Message> comparator = new MessageComparator();
+        messageQueue = new PriorityQueue<Message>(10, comparator);
+        ackList = Collections.synchronizedList(new ArrayList<Message>());
+        toAck = Collections.synchronizedList(new ArrayList<Message>());
+        waitList = Collections.synchronizedList(new ArrayList<Message>());
         this.receivePort = receivePort;
     } // RChannel()
 
@@ -66,9 +66,9 @@ public class RChannel implements ReliableChannel {
      */
     public void rsend(Message m) {
         // if (messageQueue.size() < sThread.MAX_QUEUE) {
-        //         messageQueue.offer((RMessage)m);
+        //         messageQueue.offer((Message)m);
         // else
-        waitList.add((RMessage)m);
+        waitList.add((Message) m);
     } // rsend()
 
     /** Spawns a new receiver thread.

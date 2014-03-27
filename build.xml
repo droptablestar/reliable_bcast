@@ -14,7 +14,7 @@
     <jar destfile="dist/rchannel.jar">
       <fileset dir="classes"/>
       <manifest>
-	<attribute name="Main-Class" value="edu.purdue.cs505.Node"/>
+	<attribute name="Main-Class" value="edu.purdue.cs505.BcastNode"/>
       </manifest>
     </jar>
   </target>
@@ -30,7 +30,7 @@
     <jar destfile="dist/rchannel.jar">
       <fileset dir="classes"/>
       <manifest>
-	<attribute name="Main-Class" value="edu.purdue.cs505.Node"/>
+	<attribute name="Main-Class" value="edu.purdue.cs505.BcastNode"/>
       </manifest>
     </jar>
   </target>

@@ -16,10 +16,10 @@ public class ReceiveThread extends Thread {
     private RChannelReceiver rcr;
     
     /** List of ACKs received. Shared across threads. */
-    private List<RMessage> ackList;
+    private List<Message> ackList;
 
     /** List of ACKs to be sent. Shared across threads. */
-    private List<RMessage> toAck;
+    private List<Message> toAck;
 
     /** Value determining whether or not to continue execution. */
     private boolean stopped;
@@ -37,7 +37,7 @@ public class ReceiveThread extends Thread {
      * @param toAck list of ACKs to be sent. Modified by rcr.
      */
     public ReceiveThread(int portNumber, RChannelReceiver rcr,
-                         List<RMessage> ackList, List<RMessage> toAck) {
+                         List<Message> ackList, List<Message> toAck) {
         this.portNumber = portNumber;
         this.rcr = rcr;
         this.ackList = ackList;
@@ -55,6 +55,7 @@ public class ReceiveThread extends Thread {
             this.socket = new DatagramSocket(portNumber);
             this.socket.setSoTimeout(500);
             while (!stopped) {
+                System.out.println("listening....." + portNumber);
                 byte[] buf = new byte[65536];
                 DatagramPacket packet =
                     new DatagramPacket(buf, buf.length);
@@ -73,9 +74,9 @@ public class ReceiveThread extends Thread {
                 //     continue;
                 // }
 
-		// build an RMessage out of this bidniss
-		RMessage finalProduct = new RMessage();
-                finalProduct.setMessageContents(msg);
+		// build an Message out of this bidniss
+		Message finalProduct = new Message();
+                finalProduct.setContents(msg);
                 // if (finalProduct.isEOT()) {
                 //     System.out.println("DONE!");
                 //     done = true;

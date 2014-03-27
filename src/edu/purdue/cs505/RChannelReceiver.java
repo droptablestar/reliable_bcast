@@ -29,7 +29,7 @@ public class RChannelReceiver implements ReliableChannelReceiver {
      * @param m message received.
      */
     public void rreceive(Message m) {
-        RMessage msg = (RMessage)m;
+        Message msg = (Message) m;
         wr.println(msg.getMessageString());
         wr.flush();
     } // rreceive()

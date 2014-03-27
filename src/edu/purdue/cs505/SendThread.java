@@ -14,18 +14,18 @@ public class SendThread extends Thread {
     private final long TIMEOUT = 100;
 
     /** A list which contains messages the sender needs to send. */
-    private PriorityQueue<RMessage> messageQueue;
+    private PriorityQueue<Message> messageQueue;
 
     /** A list which contains messages the receiver has ACK'd. This is how
      * messages will be removed from the sender's queue. Shared across
      * threads. */
-    private List<RMessage> ackList;
+    private List<Message> ackList;
 
     /** A list which contains messages the sender thread needs to send ACKs
      *  for. Shared across threads. */
-    private List<RMessage> toAck;
+    private List<Message> toAck;
 
-    private List<RMessage> waitList;
+    private List<Message> waitList;
 
     /** The socket to be used for communication in this thread. */
     private DatagramSocket socket;
@@ -50,9 +50,9 @@ public class SendThread extends Thread {
      * @param toAck messages that have been received but need ACKs to be sent
      */
     public SendThread(String destIP, int destPort,
-                      PriorityQueue<RMessage> messageQueue,
-                      List<RMessage> ackList, List<RMessage> toAck,
-                      List<RMessage> waitList) {
+                      PriorityQueue<Message> messageQueue,
+                      List<Message> ackList, List<Message> toAck,
+                      List<Message> waitList) {
         this.stopped = false;
         this.messageQueue = messageQueue;
         this.ackList = ackList;
@@ -78,7 +78,7 @@ public class SendThread extends Thread {
     public void run() {
         while (!stopped) {
             long now = System.currentTimeMillis();
-            RMessage msg = messageQueue.peek();
+            Message msg = messageQueue.peek();
             while (msg != null && (now - msg.getTimeout()) >= TIMEOUT) {
                 // send message, update timeout, and put it back in queue
                 msg = messageQueue.poll();
@@ -100,7 +100,7 @@ public class SendThread extends Thread {
             if (mq_size < MAX_QUEUE && waitList.size() > 0) {
                 int diff = MAX_QUEUE - mq_size;
                 synchronized(waitList) {
-                    Iterator<RMessage> wi = waitList.iterator();
+                    Iterator<Message> wi = waitList.iterator();
                     while (wi.hasNext() && (diff--) >= 0) {
                         // System.out.println("ADDING " + diff);
                         messageQueue.offer(wi.next());
@@ -111,9 +111,9 @@ public class SendThread extends Thread {
 
             /* send ACKs. they are stored in toAck. */
             synchronized(toAck) {
-                Iterator<RMessage> ai = toAck.iterator();
+                Iterator<Message> ai = toAck.iterator();
                 while (ai.hasNext()) {
-                    RMessage m = ai.next();
+                    Message m = ai.next();
                     // System.out.print("ACKING: ");
                     // m.printMsg();
                     // if (m.isEOT1()) send(m);
@@ -124,16 +124,15 @@ public class SendThread extends Thread {
                 }
             }
 
-            Iterator<RMessage> mi=messageQueue.iterator();
+            Iterator<Message> mi=messageQueue.iterator();
             while (mi.hasNext()) {
-                RMessage m = mi.next();
+                Message m = mi.next();
                 if (removeACK(m)) {
                     // System.out.println("REMOVING");
                     mi.remove();
                 }
             }
         }
-        System.out.println("SENDER OUT!");
     } // run()
 
     /**
@@ -148,9 +147,9 @@ public class SendThread extends Thread {
      *
      * @param msg message to be sent
      */
-    private void send(RMessage msg) {
+    private void send(Message msg) {
         try {
-            String message = msg.getMessageContents();
+            String message = msg.getContents();
             byte[] buf = new byte[message.length()];
             buf = message.getBytes();
             DatagramPacket packet =
@@ -166,11 +165,11 @@ public class SendThread extends Thread {
      * @param msg message to check for in the ackList
      * @return true if something was removed, otherwise false
      */
-    private boolean removeACK(RMessage msg) {
+    private boolean removeACK(Message msg) {
         boolean removed = false;
         synchronized(ackList) {
-            for (Iterator<RMessage> ai=ackList.iterator(); ai.hasNext(); ) {
-                RMessage m = ai.next();
+            for (Iterator<Message> ai=ackList.iterator(); ai.hasNext(); ) {
+                Message m = ai.next();
                 // System.out.println("id: "+msg.getMessageID()+" id: "+
                 //                    m.getMessageID());
                 if (msg.getMessageID() == m.getMessageID()) {
