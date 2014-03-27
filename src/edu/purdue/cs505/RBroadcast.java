@@ -21,7 +21,7 @@ public class RBroadcast implements ReliableBroadcast {
     public void init(Process currentProcess) {
         this.currentProcess = currentProcess;
         receiverDummy = new RChannel(currentProcess.getPort());
-        
+        receiverDummy.init("localhost", currentProcess.getPort());
     }
 
     public void addProcess(Process p) {
@@ -40,7 +40,6 @@ public class RBroadcast implements ReliableBroadcast {
         }
 	for (Iterator<RChannel> ci=channels.iterator(); ci.hasNext(); )
             ci.next().rsend(m);
-        
     }
 
     public void rblisten(BroadcastReceiver m) {

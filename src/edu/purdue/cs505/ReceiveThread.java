@@ -55,7 +55,6 @@ public class ReceiveThread extends Thread {
             this.socket = new DatagramSocket(portNumber);
             this.socket.setSoTimeout(500);
             while (!stopped) {
-                System.out.println("listening....." + portNumber);
                 byte[] buf = new byte[65536];
                 DatagramPacket packet =
                     new DatagramPacket(buf, buf.length);
@@ -87,8 +86,8 @@ public class ReceiveThread extends Thread {
                         // if (ackList.size() <= 2000)
                             ackList.add(finalProduct);
                     }
-                    // System.out.print("Received ACK: ");
-                    // finalProduct.printMsg();
+                    System.out.print("Received ACK: ");
+                    finalProduct.printMsg();
                 }
                 // else if (finalProduct.isEOT1()) {
                 //     if (!done) {
@@ -100,7 +99,7 @@ public class ReceiveThread extends Thread {
                 //     done = true;
                 // }
                 else { // else check to see if its already been received
-                    System.out.print("Received msg: ");
+                    System.out.print(portNumber + ": Received msg: ");
                     finalProduct.printMsg();
                     if (!receivedMsgs.contains(finalProduct.getMessageID())) {
                         rcr.rreceive(finalProduct);
@@ -111,7 +110,7 @@ public class ReceiveThread extends Thread {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Init error: ServerThread()");
+            System.err.println("Init error: ServerThread()--"+portNumber);
             System.err.println(e);
             System.exit(1);
         }

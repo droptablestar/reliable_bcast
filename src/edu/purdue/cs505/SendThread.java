@@ -93,7 +93,8 @@ public class SendThread extends Thread {
                 
                 send(msg);
                 msg.setTimeout();
-                System.out.print(destPort + "Retransmitting: "); msg.printMsg();
+                System.out.print(destPort + ": Retransmitting: ");
+                msg.printMsg();
                 messageQueue.offer(msg);
                 msg = messageQueue.peek();
             }
@@ -118,8 +119,7 @@ public class SendThread extends Thread {
                     //System.out.print("ACKING: ");
                     // m.printMsg();
                     // if (m.isEOT1()) send(m);
-                    m.makeACK();
-                    send(m);
+                    sendACK(m);
                     ai.remove();
                     // System.out.print("ACKing: "); m.printMsg();
                 }
@@ -129,7 +129,7 @@ public class SendThread extends Thread {
             while (mi.hasNext()) {
                 Message m = mi.next();
                 if (removeACK(m)) {
-                    //System.out.println("REMOVING");
+                    System.out.println("REMOVING" + m);
                     mi.remove();
                 }
             }
@@ -161,6 +161,31 @@ public class SendThread extends Thread {
         }
     } // send()
 
+    /**
+     * Sends a ACK.
+     *
+     * @param msg message to be ACK'd
+     */
+    private void sendACK(Message msg) {
+        try {
+            InetAddress IP = msg.getSourceIP();
+            int port = msg.getSourcePort();
+            System.out.println("ACKING: "+msg.getSourcePort());
+            System.out.println("ACKING: "+msg.getSourceIP());
+            msg.makeACK();
+            String message = msg.getContents();
+            byte[] buf = new byte[message.length()];
+            buf = message.getBytes();
+            // System.out.println("ACKING: "+msg.getSourceIP()+":"+
+            //                    msg.getSourcePort());
+            DatagramPacket packet =
+                new DatagramPacket(buf, buf.length, IP, port);
+            socket.send(packet);
+        } catch(IOException e) {
+            System.err.println("SENDER -- packet send error: " + e);
+        }
+    } // send()
+
     /** Removes all instances of an ACK from the list of received ACKs.
      *
      * @param msg message to check for in the ackList
@@ -171,8 +196,8 @@ public class SendThread extends Thread {
         synchronized(ackList) {
             for (Iterator<Message> ai=ackList.iterator(); ai.hasNext(); ) {
                 Message m = ai.next();
-                // System.out.println("id: "+msg.getMessageID()+" id: "+
-                //                    m.getMessageID());
+                System.out.println("id: "+msg.getMessageID()+" id: "+
+                                   m.getMessageID());
                 if (msg.getMessageID() == m.getMessageID()) {
                     ai.remove();
                     // System.out.print("REMOVING!");

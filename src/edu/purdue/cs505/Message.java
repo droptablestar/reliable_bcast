@@ -1,6 +1,7 @@
 package edu.purdue.cs505;
 
 import java.util.Arrays;
+import java.net.*;
 
 public class Message {
     /** Constant used to identify that this message is an ACK. */
@@ -31,6 +32,9 @@ public class Message {
 
     private String processID;
 
+    private InetAddress sourceIP;
+    private int sourcePort;
+    
     /** Constructor which sets the string contents to nothing. */
     public Message() { this.contents = ""; }
 
@@ -39,9 +43,11 @@ public class Message {
      *
      * @param contents string contents of the message.
      */
-    public Message(String contents) {
-        this.contents = NACK + "" + (seqNum++) + ":" + contents;
+    public Message(String contents, Process p) {
         this.timeout = System.currentTimeMillis();
+        this.processID = p.getIP() + ":" + p.getPort();
+        this.contents = NACK + "" + (seqNum++) + ":" +
+            this.processID + ":" + contents;
     } // Message()
 
     /** Get the entire message contents, type, seqNum, and payload.
@@ -130,22 +136,48 @@ public class Message {
      * @return string value of the payload of this message.
      */
     public String getMessageString() {
-        return contents.substring(contents.indexOf(':') + 1);
+        int start=0;
+        for (int i=0; i<3; i++) 
+            start = contents.indexOf(':', start) + 1;
+        return contents.substring(start);
     }
 
-    public int getMessageNumber() {
-        return messageNumber;
-    }
+    public int getMessageNumber() { return messageNumber; }
 
     public void setMessageNumber(int messageNumber) {
         this.messageNumber = messageNumber;
     }
 
-    public String getProcessID() {
-        return processID;
+    public String getProcessID() { return processID; }
+    public void setProcessID(String processID) { this.processID = processID; }
+
+    public int getSourcePort() {
+        int start = 0; int end = 0;
+        for (int i=0; i<2; i++) 
+            start = contents.indexOf(':', start) + 1;
+        end = contents.indexOf(':', start);
+        return Integer.parseInt(contents.substring(start, end));
     }
+
+    public void setSourcePort(int sourcePort) { this.sourcePort = sourcePort; }
+
+    public InetAddress getSourceIP() {
+        int start = 0; int end = 0;
+        start = contents.indexOf(':', start) + 1;
+        end = contents.indexOf(':', start);
+
+        InetAddress IP = null;
+        try {
+            return InetAddress.getByName(contents.substring(start, end));
+        }
+        catch(UnknownHostException e) {
+            System.out.print("Couldn't get sourceIP!");
+            System.out.println(e);
+            System.exit(1);
+        }
+        return IP;
+    }
+    public void setSourceIP(InetAddress sourceIP) { this.sourceIP = sourceIP; }
+
     
-    public void setProcessID(String processID) {
-        this.processID = processID;
-    }
 }

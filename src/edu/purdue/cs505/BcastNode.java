@@ -45,10 +45,11 @@ public class BcastNode {
             bcasts.get(i).rblisten(new BcastReceiver());
         }
 
-        bcasts.get(0).rbroadcast(new Message(new Integer(0).toString()));
+        bcasts.get(0).rbroadcast(new Message(new Integer(0).toString(),
+                                             processes.get(0)));
         for (int i=0; i<MAX_PROCS; i++) {
-            //bcasts.get(i).haltR();
-            //bcasts.get(i).halt();
+            // bcasts.get(i).haltR();
+            // bcasts.get(i).halt();
         }
     }
 }
