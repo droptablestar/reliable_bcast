@@ -13,7 +13,7 @@ public class BcastNode {
         ArrayList<RBroadcast> bcasts = new ArrayList<RBroadcast>();
 
         // String localhost = (InetAddress.getLoopbackAddress()).toString();
-        String localhost = "localhost";
+        String localhost = "127.0.0.1";
         System.out.println(localhost);
         for (int i=0; i<MAX_PROCS; i++) {
             Process p = new Process(localhost, 6666+i);
@@ -38,7 +38,6 @@ public class BcastNode {
             System.out.println("Process list for: " + i);
             bcasts.get(i).printProcesses();
             System.out.println();
-            //bcasts.get(i).halt();
         }
 
         for (int i=0; i<MAX_PROCS; i++) {

@@ -39,6 +39,8 @@ public class SendThread extends Thread {
     /** Value determining whether or not to continue execution. */
     private boolean stopped;
 
+    private String hostName;
+    
     /** Constructor for this thread. Initializes all vairables and sets up
      * the socket for communication.
      *
@@ -59,7 +61,8 @@ public class SendThread extends Thread {
         this.toAck = toAck;
         this.waitList = waitList;
         this.destPort = destPort;
-        
+        this.hostName = destIP;
+    
         try {
             this.destIP = InetAddress.getByName(destIP);
             socket = new DatagramSocket();
@@ -150,6 +153,8 @@ public class SendThread extends Thread {
      */
     private void send(Message msg) {
         try {
+            msg.toSend(hostName, destPort);
+            msg.printMsg();
             String message = msg.getContents();
             byte[] buf = new byte[message.length()];
             buf = message.getBytes();
@@ -168,11 +173,21 @@ public class SendThread extends Thread {
      */
     private void sendACK(Message msg) {
         try {
-            InetAddress IP = msg.getSourceIP();
+            InetAddress IP=null;
+            try {
+                IP = InetAddress.getByName(msg.getSourceIP());
+            }
+            catch (UnknownHostException e) {
+                System.out.println("Error getting IP for ACK: "+ IP +
+                                   " --- " + destIP);
+                System.out.println(e);
+                System.exit(1);
+            }
             int port = msg.getSourcePort();
             System.out.println("ACKING: "+msg.getSourcePort());
             System.out.println("ACKING: "+msg.getSourceIP());
             msg.makeACK();
+            msg.printMsg();
             String message = msg.getContents();
             byte[] buf = new byte[message.length()];
             buf = message.getBytes();

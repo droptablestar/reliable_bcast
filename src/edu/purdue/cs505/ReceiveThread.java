@@ -76,6 +76,7 @@ public class ReceiveThread extends Thread {
 		// build an Message out of this bidniss
 		Message finalProduct = new Message();
                 finalProduct.setContents(msg);
+                finalProduct.stripHeader();
                 // if (finalProduct.isEOT()) {
                 //     System.out.println("DONE!");
                 //     done = true;
