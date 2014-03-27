@@ -12,10 +12,13 @@ public class RBroadcast implements ReliableBroadcast {
     private ArrayList<RChannel> channels;
     private Process currentProcess;
     private RChannel receiverDummy;
+
+    public Hashmap<String,Integer> seenMsgs;
     
     public RBroadcast() {
         processList = new ArrayList<Process>();
         channels = new ArrayList<RChannel>();
+        seenMsgs = new Hashmap<String,Integer>();
     }
     
     public void init(Process currentProcess) {
@@ -46,6 +49,8 @@ public class RBroadcast implements ReliableBroadcast {
         receiverDummy.rlisten(new RChannelReceiver());
         // System.out.println("Listening: " + currentProcess.getIP() + " : " +
         //                    currentProcess.getPort());
+        brThread = new BReceiveThread(m, seenMsgs);
+        brThread.start();
     }
 
     public void printProcesses() {
