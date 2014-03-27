@@ -44,8 +44,8 @@ public class RBroadcast implements ReliableBroadcast {
 
     public void rblisten(BroadcastReceiver m) {
         receiverDummy.rlisten(new RChannelReceiver());
-        System.out.println("Listening: " + currentProcess.getIP() + " : " +
-                           currentProcess.getPort());
+        // System.out.println("Listening: " + currentProcess.getIP() + " : " +
+        //                    currentProcess.getPort());
     }
 
     public void printProcesses() {

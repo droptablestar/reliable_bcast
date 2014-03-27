@@ -49,15 +49,10 @@ public class Message {
         return header.getTypeOfMessage() == Header.ACK;
     } // isACK()
 
-    /** Gets the unique ID associated with this contents.
-     * @return integer value corresponding to this messages sequence number.
-     */
-    public int getMessageID() {
-        return Integer.parseInt(contents.substring(1, contents.indexOf(':')));
-    } // getMessageID()
-
     /** Turns this message into an ACK. */
-    public void makeACK() {
+    public void makeACK(String destIP, int destPort) {
+        header.setDestIP(destIP);
+        header.setDestPort(destPort);
         header.setTypeOfMessage(Header.ACK);
         contents = header.toString();
     }
@@ -120,13 +115,22 @@ public class Message {
     public void setProcessID(String processID) { this.processID = processID; }
 
     public int getSourcePort() { return header.getSourcePort(); }
-    public void setSourcePort(int port) { header.setSourcePort(port); }
+    public void setSourcePort(int port) { this.header.setSourcePort(port); }
 
     public String getSourceIP() { return header.getSourceIP(); }
-    public void setSourceIP(String IP) { header.setSourceIP(IP); }
+    public void setSourceIP(String IP) { this.header.setSourceIP(IP); }
+
+    public int getDestPort() { return header.getDestPort(); }
+    public void setDestPort(int port) { this.header.setDestPort(port); }
+
+    public String getDestIP() { return header.getDestIP(); }
+    public void setDestIP(String IP) { this.header.setDestIP(IP); }
 
     public long getTimeout() { return header.getTimeout(); }
-    public void setTimeout() { header.setTimeout(); }
+    public void setTimeout() { this.header.setTimeout(); }
+
+    public int getMessageID() { return messageID; }
+    public int setMessageID(String messageID) { this.messageID = messageID; }
 
     public void stripHeader() {
         int typeOfMessage, thisSeqNum;

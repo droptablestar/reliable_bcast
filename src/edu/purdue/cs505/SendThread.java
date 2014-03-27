@@ -184,10 +184,14 @@ public class SendThread extends Thread {
                 System.exit(1);
             }
             int port = msg.getSourcePort();
-            System.out.println("ACKING: "+msg.getSourcePort());
-            System.out.println("ACKING: "+msg.getSourceIP());
-            msg.makeACK();
+            System.out.println("ACKING: "+msg.getSourceIP()+":"+
+                               msg.getSourcePort());
+            System.out.println("BEFORE: ");
             msg.printMsg();
+            msg.makeACK(msg.getDestIP(), msg.getDestPort());
+            System.out.println("AFTER: ");
+            msg.printMsg();
+
             String message = msg.getContents();
             byte[] buf = new byte[message.length()];
             buf = message.getBytes();
