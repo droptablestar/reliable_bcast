@@ -141,6 +141,7 @@ public class Message {
         for (int i=5; i<splitString.length; i++)
             tempContents.append(splitString[i]);
         contents = tempContents.toString();
+        processID = splitString[1]+":"+splitString[2];
     }
     
     public void toSend(String destIP, int destPort) {

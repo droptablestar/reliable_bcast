@@ -95,8 +95,8 @@ public class SendThread extends Thread {
                     continue;
                 }
                 
-                System.out.print(destPort + ": Retransmitting: ");
-                msg.printMsg();
+                // System.out.print(destPort + ": Retransmitting: ");
+                // msg.printMsg();
                 send(msg);
                 msg.setTimeout();
                 messageQueue.offer(msg);
@@ -163,8 +163,8 @@ public class SendThread extends Thread {
                 System.exit(1);
             }
             destPort = msg.getDestPort();
-            System.out.println("sending to "+destIP+":"+destPort);
-            msg.printMsg();
+            // System.out.println("sending to "+destIP+":"+destPort);
+            // msg.printMsg();
 
             String message = msg.headerToString()+":"+msg.getContents();
             byte[] buf = new byte[message.length()];
@@ -228,9 +228,11 @@ public class SendThread extends Thread {
         synchronized(ackList) {
             for (Iterator<Message> ai=ackList.iterator(); ai.hasNext(); ) {
                 Message m = ai.next();
+                // msg.printMsg();
+                // m.printMsg();
                 // System.out.println("id: "+msg.getProcessID()+" id: "+
                 //                    m.getProcessID());
-                if (msg.getProcessID() == m.getProcessID()) {
+                if (msg.getProcessID().equals(m.getProcessID())) {
                     ai.remove();
                     // System.out.print("REMOVING!");
                     // System.out.println("msg: "+msg.getMessageID() + " m: " +
