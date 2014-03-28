@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.List;
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
 
 public class ReceiveThread extends Thread {
     /** Socket to use for communication. */
@@ -29,6 +30,8 @@ public class ReceiveThread extends Thread {
 
     private boolean done;
     
+    private BlockingQueue<Message> receivedQueue; 
+
     /** Constructor for the receive thread. 
      *
      * @param portNumber port to bind to.
@@ -45,6 +48,19 @@ public class ReceiveThread extends Thread {
         this.receivedMsgs = new HashMap<String, Integer>();
         this.stopped = false;
         this.done = false;
+    } // ReceiveThread()
+
+    public ReceiveThread(int portNumber, RChannelReceiver rcr,
+                         List<Message> ackList, List<Message> toAck,
+                         BlockingQueue<Message> receivedQueue) {
+        this.portNumber = portNumber;
+        this.rcr = rcr;
+        this.ackList = ackList;
+        this.toAck = toAck;
+        this.receivedMsgs = new HashMap<String, Integer>();
+        this.stopped = false;
+        this.done = false;
+        this.receivedQueue = receivedQueue;
     } // ReceiveThread()
 
     /** Main method for receive thread. Waits for new messages then passes
@@ -84,10 +100,9 @@ public class ReceiveThread extends Thread {
 
                 if (finalProduct.isACK()) { // if msg is ACK add to ackList
                     synchronized(ackList) {
-                        // if (ackList.size() <= 2000)
                             ackList.add(finalProduct);
                     }
-                    System.out.print("Received ACK: ");
+                    System.out.print(portNumber + " : Received ACK: ");
                     finalProduct.printMsg();
                 }
                 // else if (finalProduct.isEOT1()) {

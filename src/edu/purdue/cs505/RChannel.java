@@ -5,6 +5,7 @@ import java.util.PriorityQueue;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 
 public class RChannel implements ReliableChannel {
     /** The thread that will control the receiver. */
@@ -31,6 +32,18 @@ public class RChannel implements ReliableChannel {
 
     private int sendPort;
     private int receivePort;
+
+    private BlockingQueue<Message> receivedQueue; 
+
+    public RChannel(int receivePort, BlockingQueue<Message> receivedQueue) {
+        Comparator<Message> comparator = new MessageComparator();
+        this.messageQueue = new PriorityQueue<Message>(10, comparator);
+        this.ackList = Collections.synchronizedList(new ArrayList<Message>());
+        this.toAck = Collections.synchronizedList(new ArrayList<Message>());
+        this.waitList = Collections.synchronizedList(new ArrayList<Message>());
+        this.receivePort = receivePort;
+        this.receivedQueue = receivedQueue;
+    } // RChannel()
 
     /** Constructor which initializes the messageQueue, ackList, and toAck
      * lists  for a Node.
@@ -65,9 +78,6 @@ public class RChannel implements ReliableChannel {
      * @param m the message to be sent.
      */
     public void rsend(Message m) {
-        // if (messageQueue.size() < sThread.MAX_QUEUE) {
-        //         messageQueue.offer((Message)m);
-        // else
         waitList.add((Message) m);
     } // rsend()
 
@@ -81,6 +91,11 @@ public class RChannel implements ReliableChannel {
         rThread.start();
     } // rlisten()
 
+    public void rlisten(ReliableChannelReceiver rcr, boolean isBcast) {
+        rThread = new ReceiveThread(receivePort, (RChannelReceiver)rcr,
+                                    ackList, toAck, receivedQueue);
+        rThread.start();
+    } // rlisten()
     /** Kills the sender thread thus preventing anymore messages from being
      * sent.
      */

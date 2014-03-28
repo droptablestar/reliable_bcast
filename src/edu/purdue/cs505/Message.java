@@ -51,9 +51,9 @@ public class Message {
 
     /** Turns this message into an ACK. */
     public void makeACK(String destIP, int destPort) {
+        header.setTypeOfMessage(Header.ACK);
         header.setDestIP(destIP);
         header.setDestPort(destPort);
-        header.setTypeOfMessage(Header.ACK);
         contents = header.toString();
     }
 
@@ -94,7 +94,7 @@ public class Message {
 
     /** Prints a message. Used for debugging. */
     public void printMsg() {
-        System.out.println("["+contents+"]");
+        System.out.println("["+header.toString()+":"+contents+"]");
     } // printMsg()
 
 
@@ -137,11 +137,16 @@ public class Message {
         header = new Header(splitString[1], Integer.parseInt(splitString[2]),
                             splitString[3], Integer.parseInt(splitString[4]),
                             typeOfMessage, thisSeqNum);
+        StringBuffer tempContents = new StringBuffer();
+        for (int i=5; i<splitString.length; i++)
+            tempContents.append(splitString[i]);
+        contents = tempContents.toString();
     }
     
     public void toSend(String destIP, int destPort) {
         header.setDestIP(destIP);
         header.setDestPort(destPort);
-        contents = header.toString()+":"+contents;
     }
+
+    public String headerToString() { return header.toString(); }
 }

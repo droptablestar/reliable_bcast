@@ -60,8 +60,8 @@ public class SendThread extends Thread {
         this.ackList = ackList;
         this.toAck = toAck;
         this.waitList = waitList;
-        this.destPort = destPort;
-        this.hostName = destIP;
+        // this.destPort = destPort;
+        // this.hostName = destIP;
     
         try {
             this.destIP = InetAddress.getByName(destIP);
@@ -74,6 +74,7 @@ public class SendThread extends Thread {
             System.err.println("SENDER -- socket error: " + e);
             System.exit(1);
         }
+        this.destPort = destPort;
     } // SendThread()
 
     /** Main execution method for send thread. Handles sending all messages. 
@@ -94,10 +95,10 @@ public class SendThread extends Thread {
                     continue;
                 }
                 
-                send(msg);
-                msg.setTimeout();
                 System.out.print(destPort + ": Retransmitting: ");
                 msg.printMsg();
+                send(msg);
+                msg.setTimeout();
                 messageQueue.offer(msg);
                 msg = messageQueue.peek();
             }
@@ -153,9 +154,19 @@ public class SendThread extends Thread {
      */
     private void send(Message msg) {
         try {
-            msg.toSend(hostName, destPort);
+            try {
+                destIP = InetAddress.getByName(msg.getDestIP());
+            }
+            catch (UnknownHostException e) {
+                System.out.println("Error send(): "+msg.getDestIP());
+                System.out.println(e);
+                System.exit(1);
+            }
+            destPort = msg.getDestPort();
+            System.out.println("sending to "+destIP+":"+destPort);
             msg.printMsg();
-            String message = msg.getContents();
+
+            String message = msg.headerToString()+":"+msg.getContents();
             byte[] buf = new byte[message.length()];
             buf = message.getBytes();
             DatagramPacket packet =
@@ -184,13 +195,15 @@ public class SendThread extends Thread {
                 System.exit(1);
             }
             int port = msg.getSourcePort();
-            System.out.println("ACKING: "+msg.getSourceIP()+":"+
-                               msg.getSourcePort());
-            System.out.println("BEFORE: ");
-            msg.printMsg();
+            // System.out.println("ACKING: "+msg.getSourceIP()+":"+
+            //                    msg.getSourcePort());
+            // System.out.println("ACKING: "+msg.getDestIP()+":"+
+            //                    msg.getDestPort());
+            // System.out.println("BEFORE: ");
+            // msg.printMsg();
             msg.makeACK(msg.getDestIP(), msg.getDestPort());
-            System.out.println("AFTER: ");
-            msg.printMsg();
+            // System.out.println("AFTER: ");
+            // msg.printMsg();
 
             String message = msg.getContents();
             byte[] buf = new byte[message.length()];
@@ -215,8 +228,8 @@ public class SendThread extends Thread {
         synchronized(ackList) {
             for (Iterator<Message> ai=ackList.iterator(); ai.hasNext(); ) {
                 Message m = ai.next();
-                System.out.println("id: "+msg.getProcessID()+" id: "+
-                                   m.getProcessID());
+                // System.out.println("id: "+msg.getProcessID()+" id: "+
+                //                    m.getProcessID());
                 if (msg.getProcessID() == m.getProcessID()) {
                     ai.remove();
                     // System.out.print("REMOVING!");

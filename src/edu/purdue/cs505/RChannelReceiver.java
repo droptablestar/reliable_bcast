@@ -7,10 +7,19 @@ import java.util.List;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import java.util.concurrent.BlockingQueue;
+
 public class RChannelReceiver implements ReliableChannelReceiver {
     /** Object used to write messages to a file. Used for testing and
      * debugging. */
     private PrintWriter wr;
+    private BlockingQueue<Message> receivedQueue;
+    private boolean isBcast;
+
+    public RChannelReceiver(BlockingQueue<Message> receivedQueue) {
+        this.receivedQueue = receivedQueue;
+        isBcast = true;
+    }
 
     /** Constructor for RChannelReceiver. Sets up printwriter and received
      * message list.
@@ -30,7 +39,12 @@ public class RChannelReceiver implements ReliableChannelReceiver {
      */
     public void rreceive(Message m) {
         Message msg = (Message) m;
-        wr.println(msg.getMessageString());
-        wr.flush();
+        if (!isBcast) {
+            wr.println(msg.getMessageString());
+            wr.flush();
+        }
+        else {
+            System.out.print("CALLBACK: "); msg.printMsg();
+        }
     } // rreceive()
 }

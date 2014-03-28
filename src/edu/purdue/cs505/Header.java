@@ -40,34 +40,16 @@ public class Header {
     public Header(String sourceIP, int sourcePort,
                   String destIP, int destPort,
                   int typeOfMessage, int thiSeqNum) {
-        // try {
-            // this.sourceIP = InetAddress.getByName(sourceIP);
-            // this.destIP = InetAddress.getByName(destIP);
-            this.sourceIP = sourceIP;
-            this.sourcePort = sourcePort;
-        // }
-        // catch (UnknownHostException e) {
-        //     System.out.println("Error getting IP for header: "+sourceIP +
-        //                        " --- " + destIP);
-        //     System.out.println(e);
-        //     System.exit(1);
-        // }
+        this.sourceIP = sourceIP;
         this.sourcePort = sourcePort;
+        this.destIP = destIP;
         this.destPort = destPort;
         this.typeOfMessage = typeOfMessage;
         this.thisSeqNum = thisSeqNum;
     }
 
     public Header(String IP, int port, int typeOfMessage, long timeout) {
-        // try {
-            // this.sourceIP = InetAddress.getByName(IP);
-            this.sourceIP = IP;
-        // }
-        // catch (UnknownHostException e) {
-        //     System.out.println("Error getting IP for header: "+IP);
-        //     System.out.println(e);
-        //     System.exit(1);
-        // }
+        this.sourceIP = IP;
         this.sourcePort = port;
         this.typeOfMessage = typeOfMessage;
         this.thisSeqNum = seqNum++;
