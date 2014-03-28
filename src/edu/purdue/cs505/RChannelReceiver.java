@@ -45,6 +45,14 @@ public class RChannelReceiver implements ReliableChannelReceiver {
         }
         else {
             System.out.print("CALLBACK: "); msg.printMsg();
+            try {
+                this.receivedQueue.put(msg);
+            }
+            catch (InterruptedException e) {
+                System.out.println("Error rreceive(): ");
+                System.out.println(e);
+                System.exit(1);
+            }
         }
     } // rreceive()
 }

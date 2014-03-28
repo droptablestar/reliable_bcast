@@ -48,7 +48,8 @@ public class RBroadcast implements ReliableBroadcast {
 
     public void rblisten(BroadcastReceiver m) {
         channel.rlisten(new RChannelReceiver(receivedQueue));
-        brThread = new BReceiveThread((BcastReceiver)m);
+        brThread = new BReceiveThread((BcastReceiver)m, receivedQueue,
+                     processList, channel);
         brThread.start();
     }
 
