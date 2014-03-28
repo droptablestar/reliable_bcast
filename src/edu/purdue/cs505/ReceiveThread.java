@@ -102,8 +102,8 @@ public class ReceiveThread extends Thread {
                     synchronized(ackList) {
                             ackList.add(finalProduct);
                     }
-                    // System.out.print(portNumber + " : Received ACK: ");
-                    // finalProduct.printMsg();
+                    System.out.print(portNumber + " : Received ACK: ");
+                    finalProduct.printMsg();
                 }
                 // else if (finalProduct.isEOT1()) {
                 //     if (!done) {
@@ -115,8 +115,8 @@ public class ReceiveThread extends Thread {
                 //     done = true;
                 // }
                 else { // else check to see if its already been received
-                    // System.out.print(portNumber + ": Received msg: ");
-                    // finalProduct.printMsg();
+                    System.out.print(portNumber + ": Received msg: ");
+                    finalProduct.printMsg();
                     if (!receivedMsgs.containsKey(finalProduct.getProcessID())) {
                         rcr.rreceive(finalProduct);
                         // first time a message was received.

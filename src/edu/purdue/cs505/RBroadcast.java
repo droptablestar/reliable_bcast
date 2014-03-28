@@ -35,14 +35,17 @@ public class RBroadcast implements ReliableBroadcast {
     }
 
     public void rbroadcast(Message m) {
+        Message msg = new Message(m.getContents(), currentProcess);
 	for (Iterator<Process> pi=processList.iterator(); pi.hasNext(); ) {
             Process p = pi.next();
-            Message msg = new Message(m.getContents(), currentProcess);
-            System.out.println("Broadcasting: " + msg.getContents() +
+            Message m2 = new Message(msg.getSourceIP(), msg.getSourcePort(),
+                                     p.getIP(), p.getPort(),
+                                     msg.getTypeOfMessage(), msg.getSeqNum(),
+                                     msg.getContents());
+            System.out.println("Broadcasting: " + m2.getContents() +
                                " to: " + p.getIP() + ":" + p.getPort());
-            msg.toSend(p.getIP(), p.getPort());
-            msg.printMsg();
-            channel.rsend(msg);
+            m2.printMsg();
+            channel.rsend(m2);
         }
     }
 

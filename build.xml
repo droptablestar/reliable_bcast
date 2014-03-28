@@ -11,7 +11,7 @@
   </target>
 
   <target name="jar" depends="build" description="Builds the jar file">
-    <jar destfile="dist/rchannel.jar">
+    <jar destfile="dist/bcast.jar">
       <fileset dir="classes"/>
       <manifest>
 	<attribute name="Main-Class" value="edu.purdue.cs505.BcastNode"/>
@@ -27,7 +27,7 @@
   </target>
 
   <target name="jard" depends="buildd" description="Builds the jar file">
-    <jar destfile="dist/rchannel.jar">
+    <jar destfile="dist/bcast.jar">
       <fileset dir="classes"/>
       <manifest>
 	<attribute name="Main-Class" value="edu.purdue.cs505.BcastNode"/>
@@ -35,6 +35,17 @@
     </jar>
   </target>
   <!-- END DEBUGGING -->
+
+  <!-- START RELIABLE CHANNEL TEST -->
+  <target name="jarr" depends="build" description="Builds the jar file">
+    <jar destfile="dist/rchannel.jar">
+      <fileset dir="classes"/>
+      <manifest>
+	<attribute name="Main-Class" value="edu.purdue.cs505.Node"/>
+      </manifest>
+    </jar>
+  </target>
+  <!-- END RELIABLE CHANNEL TEST -->
 
   <target name="doc" description="Produces the Java documentation">
     <mkdir dir="docs"/>

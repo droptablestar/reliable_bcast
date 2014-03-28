@@ -60,8 +60,6 @@ public class SendThread extends Thread {
         this.ackList = ackList;
         this.toAck = toAck;
         this.waitList = waitList;
-        // this.destPort = destPort;
-        // this.hostName = destIP;
     
         try {
             this.destIP = InetAddress.getByName(destIP);
@@ -95,8 +93,8 @@ public class SendThread extends Thread {
                     continue;
                 }
                 
-                // System.out.print(destPort + ": Retransmitting: ");
-                // msg.printMsg();
+                System.out.print(destPort + ": Retransmitting: ");
+                msg.printMsg();
                 send(msg);
                 msg.setTimeout();
                 messageQueue.offer(msg);
@@ -133,7 +131,8 @@ public class SendThread extends Thread {
             while (mi.hasNext()) {
                 Message m = mi.next();
                 if (removeACK(m)) {
-                    System.out.println("REMOVING" + m);
+                    System.out.print("REMOVING: ");
+                    m.printMsg();
                     mi.remove();
                 }
             }

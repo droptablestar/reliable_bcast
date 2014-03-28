@@ -39,7 +39,7 @@ public class Header {
 
     public Header(String sourceIP, int sourcePort,
                   String destIP, int destPort,
-                  int typeOfMessage, int thiSeqNum) {
+                  int typeOfMessage, int thisSeqNum) {
         this.sourceIP = sourceIP;
         this.sourcePort = sourcePort;
         this.destIP = destIP;
@@ -48,6 +48,7 @@ public class Header {
         this.thisSeqNum = thisSeqNum;
     }
 
+    /* This is for creating a new message */
     public Header(String IP, int port, int typeOfMessage, long timeout) {
         this.sourceIP = IP;
         this.sourcePort = port;
@@ -76,6 +77,9 @@ public class Header {
 
     public int getTypeOfMessage() { return this.typeOfMessage; }
     public void setTypeOfMessage(int type) { this.typeOfMessage = type; }
+
+    public int getSeqNum() { return this.thisSeqNum; }
+    public void setSeqNum(int seqNum) { this.thisSeqNum = seqNum; }
 
     public String toString() {
         return types[typeOfMessage]+""+thisSeqNum+":"+

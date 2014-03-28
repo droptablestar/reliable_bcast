@@ -16,6 +16,17 @@ public class Message {
     /** Constructor which sets the string contents to nothing. */
     public Message() { this.contents = ""; }
 
+    public Message(String sourceIP, int sourcePort,
+                   String destIP, int destPort,
+                   int typeOfMessage, int thisSeqNum, String contents) {
+        
+         this.header = new Header(sourceIP, sourcePort, destIP, destPort,
+                                  typeOfMessage, thisSeqNum);
+         this.processID = header.getSeqNum()+":"+sourceIP + ":" +
+             sourcePort;
+         this.contents = contents;
+    }
+
     /** Constructor which sets the contents to a string and inserts a timeout
      * value as well as the NACK value.
      *
@@ -24,7 +35,7 @@ public class Message {
     public Message(String contents, Process p) {
         this.header = new Header(p.getIP(), p.getPort(),
                                  Header.NACK, System.currentTimeMillis());
-        this.processID = p.getIP() + ":" + p.getPort();
+        this.processID = header.getSeqNum()+":"+p.getIP() + ":" + p.getPort();
         this.contents = contents;
     } // Message()
 
@@ -109,39 +120,47 @@ public class Message {
     }
 
     public int getMessageNumber() { return messageNumber; }
-    public void setMessageNumber(int num) { this.messageNumber = num; }
+    public void setMessageNumber(int num) { messageNumber = num; }
+
+    public int getTypeOfMessage() { return header.getTypeOfMessage(); }
+    public void setTypeOfMessage(int type) { header.setTypeOfMessage(type); }
 
     public int getSourcePort() { return header.getSourcePort(); }
-    public void setSourcePort(int port) { this.header.setSourcePort(port); }
+    public void setSourcePort(int port) { header.setSourcePort(port); }
 
     public String getSourceIP() { return header.getSourceIP(); }
-    public void setSourceIP(String IP) { this.header.setSourceIP(IP); }
+    public void setSourceIP(String IP) { header.setSourceIP(IP); }
 
     public int getDestPort() { return header.getDestPort(); }
-    public void setDestPort(int port) { this.header.setDestPort(port); }
+    public void setDestPort(int port) { header.setDestPort(port); }
 
     public String getDestIP() { return header.getDestIP(); }
-    public void setDestIP(String IP) { this.header.setDestIP(IP); }
+    public void setDestIP(String IP) { header.setDestIP(IP); }
 
     public long getTimeout() { return header.getTimeout(); }
-    public void setTimeout() { this.header.setTimeout(); }
+    public void setTimeout() { header.setTimeout(); }
 
     public String getProcessID() { return processID; }
-    public void setProcessID(String messageID) { this.processID = processID; }
+    public void setProcessID(String messageID) { processID = processID; }
+
+    public int getSeqNum() { return header.getSeqNum(); }
+    public void setSeqNum(int seqNum) { header.setSeqNum(seqNum); }
 
     public void stripHeader() {
-        int typeOfMessage, thisSeqNum;
-        typeOfMessage = Integer.parseInt(contents.substring(0,1));
-        thisSeqNum = Integer.parseInt(contents.substring(1,2));
+        int type, seq;
+        type = Integer.parseInt(contents.substring(0,1));
+        seq = Integer.parseInt(contents.substring(1,2));
+
         String splitString[] = contents.split(":");
         header = new Header(splitString[1], Integer.parseInt(splitString[2]),
                             splitString[3], Integer.parseInt(splitString[4]),
-                            typeOfMessage, thisSeqNum);
+                            type, seq);
+
         StringBuffer tempContents = new StringBuffer();
         for (int i=5; i<splitString.length; i++)
             tempContents.append(splitString[i]);
         contents = tempContents.toString();
-        processID = splitString[1]+":"+splitString[2];
+        processID = seq+":"+splitString[1]+":"+splitString[2];
     }
     
     public void toSend(String destIP, int destPort) {
