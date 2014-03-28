@@ -36,7 +36,7 @@ public class BReceiveThread extends Thread {
      * @param seenMsgs Hashmap of seen messages.
      */
     public BReceiveThread(BcastReceiver bcr, BlockingQueue<Message> rcvQ,
-                            ArrayList<Process> pList, RChannel channel) {
+                          ArrayList<Process> pList, RChannel channel) {
         this.bcr = bcr;
         this.stopped = false;
         this.done = false;
@@ -54,18 +54,20 @@ public class BReceiveThread extends Thread {
             Message msg = receivedQueue.peek();
             while (msg != null){
                 msg = receivedQueue.poll();
+                System.out.print(seenMsgs + " "); msg.printMsg();
                 if (!seenMsgs.containsKey(msg.getProcessID())){
                     seenMsgs.put(msg.getProcessID(), 1);
                     for(Iterator<Process> pi=processList.iterator();
-                             pi.hasNext();) {
+                        pi.hasNext();) {
                         Process p = pi.next();
                         if(!(p.getIP() == msg.getSourceIP() &&
-                                     p.getPort() == msg.getSourcePort())){
+                             p.getPort() == msg.getSourcePort())){
                             channel.rsend(msg);
                         }
                     }
                     bcr.rdeliver(msg);
                 }
+                msg = receivedQueue.peek();
             }
         }
     } // run()

@@ -93,8 +93,8 @@ public class SendThread extends Thread {
                     continue;
                 }
                 
-                System.out.print(destPort + ": Retransmitting: ");
-                msg.printMsg();
+                // System.out.print(destPort + ": Retransmitting: ");
+                // msg.printMsg();
                 send(msg);
                 msg.setTimeout();
                 messageQueue.offer(msg);
@@ -131,8 +131,8 @@ public class SendThread extends Thread {
             while (mi.hasNext()) {
                 Message m = mi.next();
                 if (removeACK(m)) {
-                    System.out.print("REMOVING: ");
-                    m.printMsg();
+                    // System.out.print("REMOVING: ");
+                    // m.printMsg();
                     mi.remove();
                 }
             }
@@ -185,32 +185,25 @@ public class SendThread extends Thread {
         try {
             InetAddress IP=null;
             try {
-                IP = InetAddress.getByName(msg.getSourceIP());
+                IP = InetAddress.getByName(msg.getDestIP());
             }
             catch (UnknownHostException e) {
-                System.out.println("Error getting IP for ACK: "+ IP +
-                                   " --- " + destIP);
+                System.out.println("FAIL: sendACK() --" + msg.getDestIP());
                 System.out.println(e);
                 System.exit(1);
             }
-            int port = msg.getSourcePort();
-            // System.out.println("ACKING: "+msg.getSourceIP()+":"+
-            //                    msg.getSourcePort());
-            // System.out.println("ACKING: "+msg.getDestIP()+":"+
-            //                    msg.getDestPort());
-            // System.out.println("BEFORE: ");
-            // msg.printMsg();
-            msg.makeACK(msg.getDestIP(), msg.getDestPort());
-            // System.out.println("AFTER: ");
-            // msg.printMsg();
+            Message ack = new Message(msg.getSourceIP(), msg.getSourcePort(),
+                                      msg.getDestIP(), msg.getDestPort(),
+                                      msg.getTypeOfMessage(), msg.getSeqNum(),
+                                      msg.getContents());
+            ack.makeACK(msg.getDestIP(), msg.getDestPort());
 
-            String message = msg.getContents();
+            String message = ack.getContents();
             byte[] buf = new byte[message.length()];
             buf = message.getBytes();
-            // System.out.println("ACKING: "+msg.getSourceIP()+":"+
-            //                    msg.getSourcePort());
+
             DatagramPacket packet =
-                new DatagramPacket(buf, buf.length, IP, port);
+                new DatagramPacket(buf, buf.length, IP, msg.getDestPort());
             socket.send(packet);
         } catch(IOException e) {
             System.err.println("SENDER -- packet send error: " + e);
