@@ -29,8 +29,6 @@ public class RBroadcast implements ReliableBroadcast {
     }
 
     public void addProcess(Process p) {
-        RChannel rc = new RChannel(currentProcess.getPort());
-        rc.init(p.getIP(), p.getPort());
         processList.add(p);
     }
 
@@ -42,9 +40,9 @@ public class RBroadcast implements ReliableBroadcast {
                                      p.getIP(), p.getPort(),
                                      msg.getTypeOfMessage(), msg.getSeqNum(),
                                      msg.getContents());
-            System.out.println("Broadcasting: " + m2.getContents() +
-                               " to: " + p.getIP() + ":" + p.getPort());
-            m2.printMsg();
+            // System.out.println("Broadcasting: " + m2.getContents() +
+            //                    " to: " + p.getIP() + ":" + p.getPort());
+            // m2.printMsg();
             channel.rsend(m2);
         }
     }

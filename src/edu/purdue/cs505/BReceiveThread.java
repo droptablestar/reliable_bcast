@@ -54,7 +54,6 @@ public class BReceiveThread extends Thread {
             Message msg = receivedQueue.peek();
             while (msg != null){
                 msg = receivedQueue.poll();
-                System.out.print(seenMsgs + " "); msg.printMsg();
                 if (!seenMsgs.containsKey(msg.getProcessID())){
                     seenMsgs.put(msg.getProcessID(), 1);
                     for(Iterator<Process> pi=processList.iterator();

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.net.*;
 
 public class BcastNode {
-    private static final int MAX_PROCS = 3;
+    private static final int MAX_PROCS = 100;
     
     public static void main(String args[]) {
         ArrayList<Process> processes = new ArrayList<Process>();
@@ -27,12 +27,14 @@ public class BcastNode {
             b.init(p);
 
             for (int j=0; j<MAX_PROCS; j++){
-                if (i != j){
+                if (i != j) {
                     Process pp = processes.get(j); 
                     b.addProcess(pp);
                 }
             }
         }
+
+        // System.exit(1);
 
         // for (int i=0; i<MAX_PROCS; i++) {
         //     System.out.println("Process list for: " + i);
