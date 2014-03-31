@@ -29,6 +29,8 @@ public class BReceiveThread extends Thread {
     /** Stopped? */
     private boolean stopped;
     private boolean done;
+    private boolean isFIFO;
+    private int expectedSeqNum;
     
     /** Constructor for the breceive thread. 
      *
@@ -36,7 +38,8 @@ public class BReceiveThread extends Thread {
      * @param seenMsgs Hashmap of seen messages.
      */
     public BReceiveThread(BcastReceiver bcr, BlockingQueue<Message> rcvQ,
-                          ArrayList<Process> pList, RChannel channel) {
+                          ArrayList<Process> pList, RChannel channel,
+                          boolean isFIFO) {
         this.bcr = bcr;
         this.stopped = false;
         this.done = false;
@@ -44,6 +47,8 @@ public class BReceiveThread extends Thread {
         this.receivedQueue = rcvQ;
         this.processList = pList;
         this.channel = channel;
+        this.isFIFO = isFIFO;
+        this.expectedSeqNum = 0;
     } // BReceiveThread()
 
     /** Main method for breceive thread. Waits for new messages then passes
@@ -54,23 +59,55 @@ public class BReceiveThread extends Thread {
             Message msg = receivedQueue.peek();
             while (msg != null){
                 msg = receivedQueue.poll();
-                if (!seenMsgs.containsKey(msg.getProcessID())){
-                    seenMsgs.put(msg.getProcessID(), 1);
-                    for(Iterator<Process> pi=processList.iterator();
-                        pi.hasNext();) {
-                        Process p = pi.next();
-                        if(!(p.getIP() == msg.getSourceIP() &&
-                             p.getPort() == msg.getSourcePort())){
-                            channel.rsend(msg);
-                        }
-                    }
-                    bcr.rdeliver(msg);
-                }
+
+                if (isFIFO) receiveFIFO(msg);
+                else receiveBcast(msg);
+
                 msg = receivedQueue.peek();
             }
         }
     } // run()
 
+    private void receiveFIFO(Message msg) {
+        // System.out.println("receiveFIFO: ");
+        // msg.printMsg();
+        if (!seenMsgs.containsKey(msg.getProcessID())
+            && msg.getSeqNum() == expectedSeqNum) {
+            seenMsgs.put(msg.getProcessID(), 1);
+            
+            for(Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
+                Process p = pi.next();
+                if(!(p.getIP() == msg.getSourceIP()
+                     && p.getPort() == msg.getSourcePort())) {
+                    channel.rsend(msg);
+                }
+            }
+            bcr.rdeliver(msg);
+            expectedSeqNum++;
+        }
+        else if (msg.getSeqNum() > expectedSeqNum) {
+            try{ receivedQueue.put(msg); }
+            catch (InterruptedException e) {
+                System.out.println("Error putting message in receivedQueue.");
+                System.out.println(e);
+            }
+        }
+    }
+    
+    private void receiveBcast(Message msg) {
+        if (!seenMsgs.containsKey(msg.getProcessID())) {
+            seenMsgs.put(msg.getProcessID(), 1);
+            
+            for(Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
+                Process p = pi.next();
+                if(!(p.getIP() == msg.getSourceIP()
+                     && p.getPort() == msg.getSourcePort())) {
+                    channel.rsend(msg);
+                }
+            }
+            bcr.rdeliver(msg);
+        }
+    }
     /**
      * Sets a boolean in the thread to exit the run() loop
      */

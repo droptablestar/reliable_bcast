@@ -140,11 +140,16 @@ public class Message {
     public long getTimeout() { return header.getTimeout(); }
     public void setTimeout() { header.setTimeout(); }
 
+    public int getSeqNum() { return header.getSeqNum(); }
+    public void setSeqNum(int seqNum) { header.setSeqNum(seqNum); }
+
     public String getProcessID() { return processID; }
     public void setProcessID(String messageID) { processID = processID; }
 
-    public int getSeqNum() { return header.getSeqNum(); }
-    public void setSeqNum(int seqNum) { header.setSeqNum(seqNum); }
+    public String getDestID() {
+        return header.getSeqNum() + ":" + header.getDestIP() + ":"
+            + header.getDestPort();
+    }
 
     public void stripHeader() {
         int type, seq;
