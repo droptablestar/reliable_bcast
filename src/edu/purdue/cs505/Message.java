@@ -9,7 +9,6 @@ public class Message {
 
     private int messageNumber;
 
-    private String processID;
 
     private Header header;
     
@@ -22,8 +21,6 @@ public class Message {
         
          this.header = new Header(sourceIP, sourcePort, destIP, destPort,
                                   typeOfMessage, thisSeqNum);
-         this.processID = header.getSeqNum()+":"+sourceIP + ":" +
-             sourcePort;
          this.contents = contents;
     }
 
@@ -35,7 +32,6 @@ public class Message {
     public Message(String contents, Process p) {
         this.header = new Header(p.getIP(), p.getPort(),
                                  Header.NACK, System.currentTimeMillis());
-        this.processID = header.getSeqNum()+":"+p.getIP() + ":" + p.getPort();
         this.contents = contents;
     } // Message()
 
@@ -143,8 +139,9 @@ public class Message {
     public int getSeqNum() { return header.getSeqNum(); }
     public void setSeqNum(int seqNum) { header.setSeqNum(seqNum); }
 
-    public String getProcessID() { return processID; }
-    public void setProcessID(String messageID) { processID = processID; }
+    public String getProcessID() { return header.getProcessID(); }
+    public void setProcessID(int seqNum, String IP, int port) { header.setProcessID(seqNum, IP, port); }
+    public void setProcessID(String processID) { header.setProcessID(processID); }
 
     public String getDestID() {
         return header.getSeqNum() + ":" + header.getDestIP() + ":"
@@ -153,8 +150,9 @@ public class Message {
 
     public void stripHeader() {
         int type, seq;
+        int firstColon = contents.indexOf(':');
         type = Integer.parseInt(contents.substring(0,1));
-        seq = Integer.parseInt(contents.substring(1,2));
+        seq = Integer.parseInt(contents.substring(1,firstColon));
 
         String splitString[] = contents.split(":");
         header = new Header(splitString[1], Integer.parseInt(splitString[2]),
@@ -165,7 +163,8 @@ public class Message {
         for (int i=5; i<splitString.length; i++)
             tempContents.append(splitString[i]);
         contents = tempContents.toString();
-        processID = seq+":"+splitString[1]+":"+splitString[2];
+        header.setProcessID(Integer.parseInt(splitString[5]),
+	                    splitString[6],Integer.parseInt(splitString[7]));
     }
     
     public void toSend(String destIP, int destPort) {

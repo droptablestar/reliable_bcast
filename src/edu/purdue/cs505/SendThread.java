@@ -185,25 +185,25 @@ public class SendThread extends Thread {
         try {
             InetAddress IP=null;
             try {
-                IP = InetAddress.getByName(msg.getDestIP());
+                IP = InetAddress.getByName(msg.getSourceIP());
             }
             catch (UnknownHostException e) {
                 System.out.println("FAIL: sendACK() --" + msg.getDestIP());
                 System.out.println(e);
                 System.exit(1);
             }
-            Message ack = new Message(msg.getSourceIP(), msg.getSourcePort(),
-                                      msg.getDestIP(), msg.getDestPort(),
-                                      msg.getTypeOfMessage(), msg.getSeqNum(),
+            Message ack = new Message(msg.getDestIP(), msg.getDestPort(),
+                                      msg.getSourceIP(), msg.getSourcePort(),
+                                      Header.ACK, msg.getSeqNum(),
                                       msg.getContents());
-            ack.makeACK(msg.getDestIP(), msg.getDestPort());
 
-            String message = ack.getContents();
+            ack.setProcessID(msg.getProcessID());
+            String message = ack.headerToString();
             byte[] buf = new byte[message.length()];
             buf = message.getBytes();
 
             DatagramPacket packet =
-                new DatagramPacket(buf, buf.length, IP, msg.getDestPort());
+                new DatagramPacket(buf, buf.length, IP, msg.getSourcePort());
             socket.send(packet);
         } catch(IOException e) {
             System.err.println("SENDER -- packet send error: " + e);

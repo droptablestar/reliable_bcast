@@ -71,6 +71,7 @@ public class ReceiveThread extends Thread {
             this.socket = new DatagramSocket(portNumber);
             this.socket.setSoTimeout(500);
             while (!stopped) {
+                //System.out.println(portNumber + " " + toAck.size() + " " + ackList.size());
                 byte[] buf = new byte[65536];
                 DatagramPacket packet =
                     new DatagramPacket(buf, buf.length);

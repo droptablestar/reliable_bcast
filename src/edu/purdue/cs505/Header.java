@@ -34,6 +34,8 @@ public class Header {
     
     private String destIP;
     private int destPort = 0;
+
+    private String processID;
     
     private int typeOfMessage;
 
@@ -81,9 +83,13 @@ public class Header {
     public int getSeqNum() { return this.thisSeqNum; }
     public void setSeqNum(int seqNum) { this.thisSeqNum = seqNum; }
 
+    public String getProcessID() { return this.processID; }
+    public void setProcessID(int seqNum, String IP, int port) { this.processID = seqNum + ":" + IP + ":" +port; }
+    public void setProcessID(String processID) { this.processID = processID; }
+
     public String toString() {
         return types[typeOfMessage]+""+thisSeqNum+":"+
             sourceIP.toString()+":"+sourcePort+ ":"+
-            destIP+":"+destPort;
+            destIP+":"+destPort + ":" +processID;
     }
 }

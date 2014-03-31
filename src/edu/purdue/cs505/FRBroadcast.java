@@ -45,6 +45,7 @@ public class FRBroadcast implements FIFOReliableBroadcast {
                                      p.getIP(), p.getPort(),
                                      m.getTypeOfMessage(), m.getSeqNum(),
                                      m.getContents());
+            m2.setProcessID(m.getSeqNum(),m.getSourceIP(),m.getSourcePort());
             channel.rsend(m2);
             break;
         }
@@ -52,6 +53,7 @@ public class FRBroadcast implements FIFOReliableBroadcast {
                                  currentProcess.getIP(), currentProcess.getPort(),
                                  m.getTypeOfMessage(), m.getSeqNum(),
                                  m.getContents());
+        m2.setProcessID(m.getSeqNum(),m.getSourceIP(),m.getSourcePort());
         channel.rsend(m2);
     }
 

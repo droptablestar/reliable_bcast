@@ -59,6 +59,7 @@ public class BReceiveThread extends Thread {
             Message msg = receivedQueue.peek();
             while (msg != null){
                 msg = receivedQueue.poll();
+                //System.out.println(msg.getDestIP() + " " + msg.getDestPort() + " " + receivedQueue.size() + " " + seenMsgs.size());
 
                 if (isFIFO) receiveFIFO(msg);
                 else receiveBcast(msg);
@@ -69,17 +70,22 @@ public class BReceiveThread extends Thread {
     } // run()
 
     private void receiveFIFO(Message msg) {
+        //System.out.println("Considering message: ");
+        //msg.printMsg();
         if (!seenMsgs.containsKey(msg.getProcessID())
             && msg.getSeqNum() == expectedSeqNum) {
             seenMsgs.put(msg.getProcessID(), 1);
             
             for(Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
                 Process p = pi.next();
-                Message m = new Message(msg.getSourceIP(),msg.getSourcePort(),
+                Message m = new Message(msg.getDestIP(),msg.getDestPort(),
                                         p.getIP(), p.getPort(),
                                         Header.NACK, msg.getSeqNum(),
                                         msg.getContents());
-                channel.rsend(msg);
+                //System.out.print("REDUNDANT SENDING: ");
+                //m.printMsg();
+                m.setProcessID(msg.getProcessID());
+                channel.rsend(m);
             }
             bcr.rdeliver(msg);
             expectedSeqNum++;
@@ -94,15 +100,18 @@ public class BReceiveThread extends Thread {
     }
     
     private void receiveBcast(Message msg) {
+        //System.out.print("Considering message: ");
+        //msg.printMsg();
         if (!seenMsgs.containsKey(msg.getProcessID())) {
             seenMsgs.put(msg.getProcessID(), 1);
             
             for (Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
                 Process p = pi.next();
-                Message m = new Message(msg.getSourceIP(),msg.getSourcePort(),
+                Message m = new Message(msg.getDestIP(),msg.getDestPort(),
                                         p.getIP(), p.getPort(),
                                         Header.NACK, msg.getSeqNum(),
                                         msg.getContents());
+                m.setProcessID(msg.getProcessID());
                 channel.rsend(m);
             }
             bcr.rdeliver(msg);

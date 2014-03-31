@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.net.*;
 
 public class BcastNode {
-    private static final int MAX_PROCS = 5;
-    private static final int NUM_MSGS = 1;
+    private static final int MAX_PROCS = 3;
+    private static final int NUM_MSGS = 1000;
     private static ArrayList<Process> processes = new ArrayList<Process>();
     
     public static void main(String args[]) {

@@ -52,13 +52,15 @@ public class RBroadcast implements ReliableBroadcast {
                                      p.getIP(), p.getPort(),
                                      m.getTypeOfMessage(), m.getSeqNum(),
                                      m.getContents());
+            m2.setProcessID(m.getSeqNum(),m.getSourceIP(),m.getSourcePort());
             channel.rsend(m2);
-            break;
         }
         Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
                                  currentProcess.getIP(), currentProcess.getPort(),
                                  m.getTypeOfMessage(), m.getSeqNum(),
                                  m.getContents());
+
+        m2.setProcessID(m.getSeqNum(),m.getSourceIP(),m.getSourcePort());
         channel.rsend(m2);
     }
 
