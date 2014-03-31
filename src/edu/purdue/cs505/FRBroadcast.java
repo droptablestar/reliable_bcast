@@ -29,16 +29,30 @@ public class FRBroadcast implements FIFOReliableBroadcast {
     }
 
     public void rbroadcast(Message m) {
-        for (Process p : processList) {
-            Message msg = new Message(m.getSourceIP(), m.getSourcePort(),
-                                      p.getIP(), p.getPort(),
-                                      m.getTypeOfMessage(), m.getSeqNum(),
-                                      m.getContents());
-            // System.out.println("Broadcasting: " + m2.getContents() +
-            //                    " to: " + p.getIP() + ":" + p.getPort());
-            // m2.printMsg();
-            channel.rsend(msg);
+        // for (Process p : processList) {
+        //     Message msg = new Message(m.getSourceIP(), m.getSourcePort(),
+        //                               p.getIP(), p.getPort(),
+        //                               m.getTypeOfMessage(), m.getSeqNum(),
+        //                               m.getContents());
+        //     // System.out.println("Broadcasting: " + m2.getContents() +
+        //     //                    " to: " + p.getIP() + ":" + p.getPort());
+        //     // m2.printMsg();
+        //     channel.rsend(msg);
+        // }
+	for (Iterator<Process> pi=processList.iterator(); pi.hasNext(); ) {
+            Process p = pi.next();
+            Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
+                                     p.getIP(), p.getPort(),
+                                     m.getTypeOfMessage(), m.getSeqNum(),
+                                     m.getContents());
+            channel.rsend(m2);
+            break;
         }
+        Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
+                                 currentProcess.getIP(), currentProcess.getPort(),
+                                 m.getTypeOfMessage(), m.getSeqNum(),
+                                 m.getContents());
+        channel.rsend(m2);
     }
 
     public void rblisten(BroadcastReceiver m) {

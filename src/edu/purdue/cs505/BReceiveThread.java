@@ -69,24 +69,23 @@ public class BReceiveThread extends Thread {
     } // run()
 
     private void receiveFIFO(Message msg) {
-        // System.out.println("receiveFIFO: ");
-        // msg.printMsg();
         if (!seenMsgs.containsKey(msg.getProcessID())
             && msg.getSeqNum() == expectedSeqNum) {
             seenMsgs.put(msg.getProcessID(), 1);
             
             for(Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
                 Process p = pi.next();
-                if(!(p.getIP() == msg.getSourceIP()
-                     && p.getPort() == msg.getSourcePort())) {
-                    channel.rsend(msg);
-                }
+                Message m = new Message(msg.getSourceIP(),msg.getSourcePort(),
+                                        p.getIP(), p.getPort(),
+                                        Header.NACK, msg.getSeqNum(),
+                                        msg.getContents());
+                channel.rsend(msg);
             }
             bcr.rdeliver(msg);
             expectedSeqNum++;
         }
         else if (msg.getSeqNum() > expectedSeqNum) {
-            try{ receivedQueue.put(msg); }
+            try { receivedQueue.put(msg); }
             catch (InterruptedException e) {
                 System.out.println("Error putting message in receivedQueue.");
                 System.out.println(e);
@@ -98,16 +97,18 @@ public class BReceiveThread extends Thread {
         if (!seenMsgs.containsKey(msg.getProcessID())) {
             seenMsgs.put(msg.getProcessID(), 1);
             
-            for(Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
+            for (Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
                 Process p = pi.next();
-                if(!(p.getIP() == msg.getSourceIP()
-                     && p.getPort() == msg.getSourcePort())) {
-                    channel.rsend(msg);
-                }
+                Message m = new Message(msg.getSourceIP(),msg.getSourcePort(),
+                                        p.getIP(), p.getPort(),
+                                        Header.NACK, msg.getSeqNum(),
+                                        msg.getContents());
+                channel.rsend(m);
             }
             bcr.rdeliver(msg);
         }
     }
+
     /**
      * Sets a boolean in the thread to exit the run() loop
      */

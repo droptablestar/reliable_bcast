@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.net.*;
 
 public class BcastNode {
-    private static final int MAX_PROCS = 3;
-    private static final int NUM_MSGS = 2;
+    private static final int MAX_PROCS = 5;
+    private static final int NUM_MSGS = 1;
     private static ArrayList<Process> processes = new ArrayList<Process>();
     
     public static void main(String args[]) {
@@ -38,9 +38,9 @@ public class BcastNode {
                 }
             }
         }
-        for (int i=0; i<MAX_PROCS; i++) {
-            fcasts.get(i).rblisten(new BcastReceiver());
-        }
+
+        for (int i=0; i<MAX_PROCS; i++) 
+            fcasts.get(i).rblisten(new BcastReceiver(i));
 
         for (int i=0; i<NUM_MSGS; i++)
             fcasts.get(0).rbroadcast(new Message(new Integer(i).toString(),
@@ -75,9 +75,12 @@ public class BcastNode {
         }
 
         for (int i=0; i<MAX_PROCS; i++) {
-            bcasts.get(i).rblisten(new BcastReceiver());
+            bcasts.get(i).rblisten(new BcastReceiver(i));
         }
 
+        // for (int i=0; i<NUM_MSGS; i++)
+        //     bcasts.get(0).rbroadcast(new Message(new Integer(i).toString(),
+        //                                          processes.get(0)));
         for (int i=0; i<NUM_MSGS; i++)
             bcasts.get(0).rbroadcast(new Message(new Integer(i).toString(),
                                                  processes.get(0)));
