@@ -13,6 +13,9 @@ public class FRBroadcast implements FIFOReliableBroadcast {
     private BReceiveThread brThread;
     private BlockingQueue<Message> receivedQueue; 
 
+    public static boolean srbOn = true;
+    public static long deliveryDelay = 1000;
+    
     public FRBroadcast() {
         processList = new ArrayList<Process>();
         receivedQueue = new LinkedBlockingQueue<Message>();
@@ -29,16 +32,6 @@ public class FRBroadcast implements FIFOReliableBroadcast {
     }
 
     public void rbroadcast(Message m) {
-        // for (Process p : processList) {
-        //     Message msg = new Message(m.getSourceIP(), m.getSourcePort(),
-        //                               p.getIP(), p.getPort(),
-        //                               m.getTypeOfMessage(), m.getSeqNum(),
-        //                               m.getContents());
-        //     // System.out.println("Broadcasting: " + m2.getContents() +
-        //     //                    " to: " + p.getIP() + ":" + p.getPort());
-        //     // m2.printMsg();
-        //     channel.rsend(msg);
-        // }
 	for (Iterator<Process> pi=processList.iterator(); pi.hasNext(); ) {
             Process p = pi.next();
             Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
@@ -47,7 +40,6 @@ public class FRBroadcast implements FIFOReliableBroadcast {
                                      m.getContents());
             m2.setProcessID(m.getSeqNum(),m.getSourceIP(),m.getSourcePort());
             channel.rsend(m2);
-            break;
         }
         Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
                                  currentProcess.getIP(), currentProcess.getPort(),

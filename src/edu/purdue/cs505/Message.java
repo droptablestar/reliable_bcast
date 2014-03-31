@@ -7,9 +7,6 @@ public class Message {
     /** String value associated with this message. */
     private String contents;
 
-    private int messageNumber;
-
-
     private Header header;
     
     /** Constructor which sets the string contents to nothing. */
@@ -56,6 +53,10 @@ public class Message {
         return header.getTypeOfMessage() == Header.ACK;
     } // isACK()
 
+    public boolean isOBS() {
+        return header.getTypeOfMessage() == Header.OBS;
+    } // isACK()
+
     /** Turns this message into an ACK. */
     public void makeACK(String destIP, int destPort) {
         header.setTypeOfMessage(Header.ACK);
@@ -64,40 +65,10 @@ public class Message {
         contents = header.toString();
     }
 
-    /** Turns this message into an ACK. */
-    public Message makeEOT(int phase) {
-        if (phase == 1)
-            contents = Header.EOT1+""+
-                contents.substring(1,contents.indexOf(':')+1);
-        else if (phase == 2)
-            contents = Header.EOT2+""+
-                contents.substring(1,contents.indexOf(':')+1);
-        else if (phase == 3)
-            contents = Header.EOT3+""+
-                contents.substring(1,contents.indexOf(':')+1);
-        return this;
-    } // makeEOT()
-    
-    /** Determines if this message is an EOT phase 1 or not.
-     * @return true if this message is an EOT, otherwise false
-     */
-    public boolean isEOT1() {
-        return contents.substring(0,2).equals(Header.EOT1) ? true : false;
-    } // isEOT1()
-
-    /** Determines if this message is an EOT phase 2 or not.
-     * @return true if this message is an EOT, otherwise false
-     */
-    public boolean isEOT2() {
-        return contents.substring(0,2).equals(Header.EOT2) ? true : false;
-    } // isEOT2()
-
-    /** Determines if this contents is an EOT phase 3 or not.
-     * @return true if this message is an EOT, otherwise false
-     */
-    public boolean isEOT3() {
-        return contents.substring(0,2).equals(Header.EOT3) ? true : false;
-    } // isEOT3()
+    public void makesObsolete(int seqNum) {
+        header.setTypeOfMessage(Header.OBS);
+        header.setSeqNum(seqNum);
+    }
 
     /** Prints a message. Used for debugging. */
     public void printMsg() {
@@ -115,8 +86,8 @@ public class Message {
         return contents.substring(start);
     }
 
-    public int getMessageNumber() { return messageNumber; }
-    public void setMessageNumber(int num) { messageNumber = num; }
+    public int getMessageNumber() { return header.getSeqNum(); }
+    public void setMessageNumber(int num) { header.setSeqNum(num); }
 
     public int getTypeOfMessage() { return header.getTypeOfMessage(); }
     public void setTypeOfMessage(int type) { header.setTypeOfMessage(type); }
@@ -160,7 +131,7 @@ public class Message {
                             type, seq);
 
         StringBuffer tempContents = new StringBuffer();
-        for (int i=5; i<splitString.length; i++)
+        for (int i=8; i<splitString.length; i++)
             tempContents.append(splitString[i]);
         contents = tempContents.toString();
         header.setProcessID(Integer.parseInt(splitString[5]),

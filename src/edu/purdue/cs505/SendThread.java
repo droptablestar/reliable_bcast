@@ -11,7 +11,7 @@ public class SendThread extends Thread {
     public static final int MAX_QUEUE = 2000;
     
     /** amount of  time (in ms) to wait before resending a message */
-    private final long TIMEOUT = 100;
+    private final long TIMEOUT = 500;
 
     /** A list which contains messages the sender needs to send. */
     private PriorityQueue<Message> messageQueue;
@@ -220,11 +220,16 @@ public class SendThread extends Thread {
         synchronized(ackList) {
             for (Iterator<Message> ai=ackList.iterator(); ai.hasNext(); ) {
                 Message m = ai.next();
-                // msg.printMsg();
-                // m.printMsg();
-                // System.out.println("id: "+msg.getProcessID()+" id: "+
+		 //System.out.print("MSG " + msg.getSeqNum() + " " + msg.getDestPort() + "::" + m.getSourcePort() + " " + m.getSeqNum() + " ACK");
+                 //System.out.println();
+		 //msg.printMsg();
+                 //m.printMsg();
+                 //System.out.println("id: "+msg.getProcessID()+" id: "+
                 //                    m.getProcessID());
-                if (msg.getProcessID().equals(m.getProcessID())) {
+		if ((msg.getDestPort() == m.getSourcePort()) && 
+		    (msg.getDestIP().equals(m.getSourceIP())) && 
+		    (msg.getSeqNum() == m.getSeqNum())) {
+		    //System.out.println("REMOVING!");
                     ai.remove();
                     // System.out.print("REMOVING!");
                     // System.out.println("msg: "+msg.getMessageID() + " m: " +

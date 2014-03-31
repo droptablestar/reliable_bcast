@@ -45,6 +45,12 @@ public class BcastNode {
         for (int i=0; i<NUM_MSGS; i++)
             fcasts.get(0).rbroadcast(new Message(new Integer(i).toString(),
                                                  processes.get(0)));
+
+
+        Message m = new Message("OBS", processes.get(0));
+        m.makesObsolete(500);
+        fcasts.get(0).rbroadcast(m);
+        
         for (int i=0; i<MAX_PROCS; i++) {
             // bcasts.get(i).haltR();
             // bcasts.get(i).halt();
@@ -82,8 +88,8 @@ public class BcastNode {
         //     bcasts.get(0).rbroadcast(new Message(new Integer(i).toString(),
         //                                          processes.get(0)));
         for (int i=0; i<NUM_MSGS; i++)
-            bcasts.get(0).rbroadcast(new Message(new Integer(i).toString(),
-                                                 processes.get(0)));
+            bcasts.get(2).rbroadcast(new Message(new Integer(i).toString(),
+                                                 processes.get(2)));
         for (int i=0; i<MAX_PROCS; i++) {
             // bcasts.get(i).haltR();
             // bcasts.get(i).halt();

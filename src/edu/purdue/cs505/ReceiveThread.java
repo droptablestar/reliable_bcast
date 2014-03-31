@@ -116,12 +116,14 @@ public class ReceiveThread extends Thread {
                 //     done = true;
                 // }
                 else { // else check to see if its already been received
-                    // System.out.print(portNumber + ": Received msg: ");
-                    // finalProduct.printMsg();
-                    if (!receivedMsgs.containsKey(finalProduct.getProcessID())) {
+		    String tempID = finalProduct.getSeqNum()
+                        + finalProduct.getSourceIP()
+                        + finalProduct.getSourcePort();
+                    
+                    if (!receivedMsgs.containsKey(tempID) || finalProduct.isOBS()){
                         rcr.rreceive(finalProduct);
                         // first time a message was received.
-                        receivedMsgs.put(finalProduct.getProcessID(), 1);
+                        receivedMsgs.put(tempID, 1);
                     }
                     toAck.add(finalProduct);
                 }

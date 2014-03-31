@@ -4,7 +4,7 @@ import java.net.*;
 
 public class Header {
     /** Constant used to identify that this message is an ACK. */
-    public static final String types[] = {"0", "1", "2", "-1", "-2", "-3"};
+    public static final String types[] = {"0", "1", "2"};
 
     /** Constant used to identify that this message is an ACK. */
     public static final int ACK = 0;
@@ -12,15 +12,9 @@ public class Header {
     /** Constant used to identify that this message is NOT an ACK. */
     public static final int NACK = 1;
 
-    /** Constant used to identify that this message is EOT phase 1. */
-    public static final int EOT1 = 2;
+    /** Constant used to identify that this message is an ACK. */
+    public static final int OBS = 2;
 
-    /** Constant used to identify that this message is EOT phase 2. */
-    public static final int EOT2 = 3;
-
-    /** Constant used to identify that this message is EOT phase 3. */
-    public static final int EOT3 = 4;
-    
     /** Global sequence associated with all messages. */
     private static int seqNum = 0;
 
@@ -48,6 +42,7 @@ public class Header {
         this.destPort = destPort;
         this.typeOfMessage = typeOfMessage;
         this.thisSeqNum = thisSeqNum;
+        this.processID = thisSeqNum+":"+sourceIP+":"+sourcePort;
     }
 
     /* This is for creating a new message */
@@ -56,6 +51,7 @@ public class Header {
         this.sourcePort = port;
         this.typeOfMessage = typeOfMessage;
         this.thisSeqNum = seqNum++;
+        this.processID = thisSeqNum+":"+IP+":"+port;
     }
 
     /** Updates the timeout value of this message to the current system
@@ -81,15 +77,15 @@ public class Header {
     public void setTypeOfMessage(int type) { this.typeOfMessage = type; }
 
     public int getSeqNum() { return this.thisSeqNum; }
-    public void setSeqNum(int seqNum) { this.thisSeqNum = seqNum; }
+    public void setSeqNum(int sNum) { this.thisSeqNum = sNum; }
 
     public String getProcessID() { return this.processID; }
-    public void setProcessID(int seqNum, String IP, int port) { this.processID = seqNum + ":" + IP + ":" +port; }
+    public void setProcessID(int sNum, String IP, int port) { this.processID = sNum + ":" + IP + ":" +port; }
     public void setProcessID(String processID) { this.processID = processID; }
 
     public String toString() {
-        return types[typeOfMessage]+""+thisSeqNum+":"+
-            sourceIP.toString()+":"+sourcePort+ ":"+
-            destIP+":"+destPort + ":" +processID;
+        return types[typeOfMessage] + "" + thisSeqNum + ":"
+            + sourceIP.toString() + ":" + sourcePort + ":"
+            + destIP + ":" + destPort + ":" + processID;
     }
 }

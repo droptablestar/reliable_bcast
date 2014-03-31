@@ -33,19 +33,6 @@ public class RBroadcast implements ReliableBroadcast {
     }
 
     public void rbroadcast(Message m) {
-        // Message msg = new Message(m.getContents(), currentProcess);
-	// for (Iterator<Process> pi=processList.iterator(); pi.hasNext(); ) {
-        //     Process p = pi.next();
-        //     Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
-        //                              p.getIP(), p.getPort(),
-        //                              m.getTypeOfMessage(), m.getSeqNum(),
-        //                              m.getContents());
-        //     // System.out.println("Broadcasting: " + m2.getContents() +
-        //     //                    " to: " + p.getIP() + ":" + p.getPort());
-        //     // m2.printMsg();
-        //     channel.rsend(m2);
-        // }
-
 	for (Iterator<Process> pi=processList.iterator(); pi.hasNext(); ) {
             Process p = pi.next();
             Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
@@ -55,13 +42,18 @@ public class RBroadcast implements ReliableBroadcast {
             m2.setProcessID(m.getSeqNum(),m.getSourceIP(),m.getSourcePort());
             channel.rsend(m2);
         }
+
         Message m2 = new Message(m.getSourceIP(), m.getSourcePort(),
                                  currentProcess.getIP(), currentProcess.getPort(),
                                  m.getTypeOfMessage(), m.getSeqNum(),
                                  m.getContents());
 
         m2.setProcessID(m.getSeqNum(),m.getSourceIP(),m.getSourcePort());
-        channel.rsend(m2);
+        try { receivedQueue.put(m2); }
+        catch (InterruptedException e) {
+            System.out.println("Error putting into receivedQueue [rbroadcast]");
+            System.out.println(e);
+        }
     }
 
     public void rblisten(BroadcastReceiver m) {

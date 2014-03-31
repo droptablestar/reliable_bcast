@@ -2,15 +2,14 @@ package edu.purdue.cs505;
 
 import java.io.*;
 import java.net.*;
-import java.util.List;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Comparator;
+
+import java.util.concurrent.BlockingQueue;
 
 public class BReceiveThread extends Thread {
-
     /** Channel used by the broadcast */
     private RChannel channel;
 
@@ -31,7 +30,9 @@ public class BReceiveThread extends Thread {
     private boolean done;
     private boolean isFIFO;
     private int expectedSeqNum;
-    
+
+    private ArrayList<Message> delayedQueue;
+
     /** Constructor for the breceive thread. 
      *
      * @param bcr RcastReceiver callback object.
@@ -49,6 +50,7 @@ public class BReceiveThread extends Thread {
         this.channel = channel;
         this.isFIFO = isFIFO;
         this.expectedSeqNum = 0;
+        this.delayedQueue = new ArrayList<Message>();
     } // BReceiveThread()
 
     /** Main method for breceive thread. Waits for new messages then passes
@@ -57,37 +59,56 @@ public class BReceiveThread extends Thread {
     public void run() {
         while (!stopped) {
             Message msg = receivedQueue.peek();
-            while (msg != null){
+            while (msg != null) {
                 msg = receivedQueue.poll();
-                //System.out.println(msg.getDestIP() + " " + msg.getDestPort() + " " + receivedQueue.size() + " " + seenMsgs.size());
 
-                if (isFIFO) receiveFIFO(msg);
+                if (msg.isOBS()) obs(msg);
+                else if (isFIFO) receiveFIFO(msg);
                 else receiveBcast(msg);
 
+                    
                 msg = receivedQueue.peek();
+            }
+            if (FRBroadcast.srbOn) {
+                long now = System.currentTimeMillis();
+                for (Iterator<Message> mi=delayedQueue.iterator();
+                     mi.hasNext(); ) {
+                    Message m = mi.next();
+                    if ((now - m.getTimeout()) > FRBroadcast.deliveryDelay) {
+                        bcr.rdeliver(m);
+                        mi.remove();
+                    }
+                    else
+                        break;
+                }
             }
         }
     } // run()
 
     private void receiveFIFO(Message msg) {
-        //System.out.println("Considering message: ");
-        //msg.printMsg();
         if (!seenMsgs.containsKey(msg.getProcessID())
             && msg.getSeqNum() == expectedSeqNum) {
             seenMsgs.put(msg.getProcessID(), 1);
             
             for(Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
                 Process p = pi.next();
-                Message m = new Message(msg.getDestIP(),msg.getDestPort(),
-                                        p.getIP(), p.getPort(),
-                                        Header.NACK, msg.getSeqNum(),
-                                        msg.getContents());
-                //System.out.print("REDUNDANT SENDING: ");
-                //m.printMsg();
-                m.setProcessID(msg.getProcessID());
-                channel.rsend(m);
+                if (p.getIP() != msg.getSourceIP()
+                    && p.getPort() != msg.getDestPort()) {
+                    Message m = new Message(msg.getDestIP(),msg.getDestPort(),
+                                            p.getIP(), p.getPort(),
+                                            Header.NACK, msg.getSeqNum(),
+                                            msg.getContents());
+
+                    m.setProcessID(msg.getProcessID());
+                    channel.rsend(m);
+                }
             }
-            bcr.rdeliver(msg);
+            if (FRBroadcast.srbOn) {
+                msg.setTimeout();
+                delayedQueue.add(msg);
+            }
+            else 
+                bcr.rdeliver(msg);
             expectedSeqNum++;
         }
         else if (msg.getSeqNum() > expectedSeqNum) {
@@ -100,24 +121,32 @@ public class BReceiveThread extends Thread {
     }
     
     private void receiveBcast(Message msg) {
-        //System.out.print("Considering message: ");
-        //msg.printMsg();
         if (!seenMsgs.containsKey(msg.getProcessID())) {
             seenMsgs.put(msg.getProcessID(), 1);
-            
             for (Iterator<Process> pi=processList.iterator(); pi.hasNext();) {
                 Process p = pi.next();
-                Message m = new Message(msg.getDestIP(),msg.getDestPort(),
-                                        p.getIP(), p.getPort(),
-                                        Header.NACK, msg.getSeqNum(),
-                                        msg.getContents());
-                m.setProcessID(msg.getProcessID());
-                channel.rsend(m);
+                if (p.getIP() != msg.getSourceIP()
+                    && p.getPort() != msg.getDestPort()) {
+                    Message m = new Message(msg.getDestIP(),msg.getDestPort(),
+                                            p.getIP(), p.getPort(),
+                                            Header.NACK, msg.getSeqNum(),
+                                            msg.getContents());
+                    m.setProcessID(msg.getProcessID());
+                    channel.rsend(m);
+                }
             }
             bcr.rdeliver(msg);
         }
     }
 
+    private void obs(Message msg) {
+        for (Iterator<Message> mi=delayedQueue.iterator(); mi.hasNext(); ) {
+            Message m = mi.next();
+            if (m.getSeqNum() <= msg.getSeqNum())
+                mi.remove();
+        }
+    }
+    
     /**
      * Sets a boolean in the thread to exit the run() loop
      */
@@ -129,4 +158,6 @@ public class BReceiveThread extends Thread {
         // System.out.println("TO: " + toAck.size() + " AL: " +ackList.size());
         return done;
     }
+
+    
 }
