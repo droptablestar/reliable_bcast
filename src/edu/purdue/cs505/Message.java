@@ -8,6 +8,8 @@ public class Message {
     private String contents;
 
     private Header header;
+
+    public static int lastDelivered = 0;
     
     /** Constructor which sets the string contents to nothing. */
     public Message() { this.contents = ""; }
@@ -68,6 +70,13 @@ public class Message {
     public void makesObsolete(int seqNum) {
         header.setTypeOfMessage(Header.OBS);
         header.setSeqNum(seqNum);
+    }
+
+    public int[] getObsoletedMessages() {
+        int[] range = new int[header.getSeqNum() - lastDelivered];
+        for (int i=lastDelivered; i<header.getSeqNum(); i++)
+            range[i-lastDelivered] = i;
+        return range;
     }
 
     /** Prints a message. Used for debugging. */

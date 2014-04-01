@@ -7,7 +7,7 @@ import java.net.*;
 
 public class BcastNode {
     private static final int MAX_PROCS = 3;
-    private static final int NUM_MSGS = 1000;
+    private static final int NUM_MSGS = 100000;
     private static ArrayList<Process> processes = new ArrayList<Process>();
     
     public static void main(String args[]) {
@@ -47,9 +47,23 @@ public class BcastNode {
                                                  processes.get(0)));
 
 
-        Message m = new Message("OBS", processes.get(0));
-        m.makesObsolete(500);
-        fcasts.get(0).rbroadcast(m);
+        // Message m = new Message("OBS", processes.get(0));
+        // m.makesObsolete(500);
+        // try { Thread.sleep(500); }
+        // catch (InterruptedException e) {System.out.println("sleep: "+e);}
+        // int x[] = m.getObsoletedMessages();
+
+        
+        // for (int i=0; i<MAX_PROCS; i++) {
+        //     fcasts.get(i).haltR();
+        //     fcasts.get(i).halt();
+        // }
+
+        // for (int i=0; i<x.length; i++)
+        //     System.out.println(x[i]);
+        
+        // System.exit(0);
+        // fcasts.get(0).rbroadcast(m);
         
         for (int i=0; i<MAX_PROCS; i++) {
             // bcasts.get(i).haltR();

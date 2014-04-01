@@ -13,7 +13,7 @@ public class FRBroadcast implements FIFOReliableBroadcast {
     private BReceiveThread brThread;
     private BlockingQueue<Message> receivedQueue; 
 
-    public static boolean srbOn = true;
+    public static boolean srbOn = false;
     public static long deliveryDelay = 1000;
     
     public FRBroadcast() {
