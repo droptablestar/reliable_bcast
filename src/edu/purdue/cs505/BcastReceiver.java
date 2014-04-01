@@ -16,8 +16,8 @@ public class BcastReceiver implements BroadcastReceiver {
     }
 
     public void rdeliver(Message m) {
-        System.out.print(m.getDestIP()+":"+m.getDestPort()+" received: ");
-        m.printMsg();
+        // System.out.print(m.getDestIP()+":"+m.getDestPort()+" received: ");
+        // m.printMsg();
 
         wr.println(m.getMessageString());
         wr.flush();

@@ -44,7 +44,7 @@ public class RChannelReceiver implements ReliableChannelReceiver {
             wr.flush();
         }
         else {
-            System.out.print("CALLBACK: "); msg.printMsg();
+            // System.out.print("CALLBACK: "); msg.printMsg();
             try {
                 receivedQueue.put(msg);
             }

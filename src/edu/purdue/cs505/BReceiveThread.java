@@ -77,6 +77,7 @@ public class BReceiveThread extends Thread {
                     if ((now - m.getTimeout()) > FRBroadcast.deliveryDelay) {
                         bcr.rdeliver(m);
                         mi.remove();
+                        Message.lastDelivered = m.getSeqNum();
                     }
                     else
                         break;

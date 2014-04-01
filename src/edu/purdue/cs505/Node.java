@@ -12,10 +12,9 @@ public class Node {
         channel.rlisten(new RChannelReceiver());
         Process p = new Process("localhost", id);
         if (id == 6667) {
-            for (int i=0; i<10000; i++) {
+            for (int i=0; i<100000; i++) {
                 Message m = new Message(new Integer(i).toString(), p);
                 m.toSend(args[0], Integer.parseInt(args[1]));
-                m.setProcessID(i, p.getIP(), p.getPort());
                 channel.rsend(m);
             }
         }
